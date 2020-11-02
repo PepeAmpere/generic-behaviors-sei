@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Default</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>59B20EC6-A96B-407D-83AE-55A6E8D2C851</ProjectGuid>
+    <Name>generic_behaviors_sei</Name>
+    <RootNamespace>generic_behaviors_sei</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Default' ">
+    <OutputPath>.</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="debug.lua">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="draw.lua">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="genericRoot.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="message.lua">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="orbat.lua">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierDismount.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierFollow.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierFollowEntity.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierFollowFormation.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierIdle.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierMount.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierMove.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="tableExt.lua">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamDefaultOccupy.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamDismount.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamFollowEntityInColumn.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamFollowEntityInFormation.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamFollowFormationInColumn.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamFollowFormationInFormation.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamMount.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamMoveInColumn.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamMoveInFormation.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="team\teamUrbanOccupyFloor.bt">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="team" />
+    <Folder Include="soldier" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

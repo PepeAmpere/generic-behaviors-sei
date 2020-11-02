@@ -1,0 +1,204 @@
+{
+  "name": "go and check",
+  "id": "e2af8f97-0577-4fa8-87d6-e14a6238fb7d",
+  "type": "supervisedParallel",
+  "subtrees": [
+    {
+      "name": "move and observe",
+      "id": "c5f9f65e-2ecc-4a5e-a2d6-03a06b6ed1a0",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "suborderData",
+          "id": "ef193b95-8da7-40c0-8e40-8217cb246dfe",
+          "type": "scriptAction",
+          "script": [
+            "loc.suborderData = tableExt.Extend(",
+            "    {},",
+            "    arg.orderData,",
+            "    {",
+            "        reportCompletedToParent = false,",
+            "        reportCompletedToExternal = false,",
+            "    }",
+            ")"
+          ]
+        },
+        {
+          "name": "Occupy position",
+          "id": "7a5d6d34-f955-4642-9850-0a9cda593297",
+          "type": "reference",
+          "target": [
+            "generic_behaviors_sei",
+            "teamMoveInColumn"
+          ],
+          "arguments": {
+            "orderData": "return loc.suborderData"
+          }
+        },
+        {
+          "name": "MSG: OrderCompleted",
+          "id": "28a6d45f-a565-484e-a310-9d7c59498a13",
+          "type": "scriptAction",
+          "script": [
+            "local receivers = message.MakeListOfReceivers(arg.orderData)",
+            "",
+            "message.ReportOrderCompleted(receivers, arg.orderData)"
+          ]
+        },
+        {
+          "name": "Wait Forever",
+          "id": "0ccec91b-9e33-4ec9-b1e3-882c72fa4a9a",
+          "type": "waitForever"
+        }
+      ],
+      "decorators": [
+        {
+          "id": "225c30b8-f845-4a86-852f-e6423e5edeea",
+          "type": "scriptCondition",
+          "name": "orderData.position?",
+          "script": [
+            "return arg.orderData.position ~= nil"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wait Forever",
+      "id": "7795d1f4-b790-4117-bd15-b43effe1c24a",
+      "type": "waitForever"
+    }
+  ],
+  "unlinked-trees": [
+    {
+      "name": "group position",
+      "id": "fc74f019-1400-404b-92cc-2b3212f46cc2",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "Pointman",
+          "id": "3011112c-98a0-46a6-b759-3318746b0441",
+          "type": "scriptAction",
+          "script": [
+            "sensor.Evaluate(arg.orderData.sensors.Pointman)"
+          ]
+        },
+        {
+          "name": "Pointman ready",
+          "id": "7acc7ddc-5515-424f-b608-ab895ebd268d",
+          "type": "waitUntil",
+          "condition": [
+            "local isReady = sensor.IsReady(arg.orderData.sensors.Pointman)",
+            "",
+            "if isReady then",
+            "    loc.currentPointman = sensor.Value(arg.orderData.sensors.Pointman)",
+            "end",
+            "",
+            "return isReady"
+          ]
+        }
+      ],
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "fc74f019-1400-404b-92cc-2b3212f46cc2",
+            "position": "1737.5,481.7"
+          },
+          {
+            "id": "3011112c-98a0-46a6-b759-3318746b0441",
+            "position": "1650,569.2"
+          },
+          {
+            "id": "7acc7ddc-5515-424f-b608-ab895ebd268d",
+            "position": "1812.5,569.2"
+          }
+        ],
+        "editorObjects": []
+      }
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "e2af8f97-0577-4fa8-87d6-e14a6238fb7d",
+        "position": "1400,381.7"
+      },
+      {
+        "id": "d5717edf-10d9-489d-b006-0a9f8679a76f",
+        "position": "1637.5,527.771428571429"
+      },
+      {
+        "id": "e0018388-c98d-44e0-a8b8-8a6b7dd2fe00",
+        "position": "1425,931.7"
+      },
+      {
+        "id": "c5f9f65e-2ecc-4a5e-a2d6-03a06b6ed1a0",
+        "position": "1400,744.2"
+      },
+      {
+        "id": "ef193b95-8da7-40c0-8e40-8217cb246dfe",
+        "position": "1037.5,956.7"
+      },
+      {
+        "id": "7a5d6d34-f955-4642-9850-0a9cda593297",
+        "position": "1225,919.2"
+      },
+      {
+        "id": "28a6d45f-a565-484e-a310-9d7c59498a13",
+        "position": "1437.5,969.2"
+      },
+      {
+        "id": "0ccec91b-9e33-4ec9-b1e3-882c72fa4a9a",
+        "position": "1648.5,943"
+      },
+      {
+        "id": "7795d1f4-b790-4117-bd15-b43effe1c24a",
+        "position": "1636.82070707071,751.515151515151"
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "d5717edf-10d9-489d-b006-0a9f8679a76f",
+        "type": "comment",
+        "header": "Pointman",
+        "body": "",
+        "bodyAlignment": "Left",
+        "width": 336.5714285714289,
+        "height": 103.99999999999986,
+        "headerBackground": "#FF87CEFA",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FFF0FFFF",
+        "boxForeground": "#FF000000"
+      },
+      {
+        "id": "e0018388-c98d-44e0-a8b8-8a6b7dd2fe00",
+        "type": "comment",
+        "header": "Parent group & External",
+        "body": "",
+        "bodyAlignment": "Left",
+        "width": 199.0,
+        "height": 102.0,
+        "headerBackground": "#FFB26B00",
+        "headerForeground": "#FFFFFFFF",
+        "boxBackground": "#FF99FF00",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3846,2844.2",
+    "gridPadding": "0,6.6999999999999"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "currentPointman": "return nil",
+    "positionIndex": "return 1",
+    "positionsPaths": "return nil",
+    "distanceReset": "return false",
+    "distanceThreshold": "return 10",
+    "suborderData": "return nil"
+  }
+}

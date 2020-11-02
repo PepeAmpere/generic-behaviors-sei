@@ -1,0 +1,252 @@
+{
+  "name": "move & listen",
+  "id": "d181b79c-c380-4b19-90e2-960c35b0caec",
+  "type": "supervisedParallel",
+  "subtrees": [
+    {
+      "name": "move to position in column",
+      "id": "c63c6104-7f9a-43a8-be61-eb7dfd8eb688",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "teamFormation",
+          "id": "ce692c7a-4864-4f6f-922e-2b8642d578db",
+          "type": "setFormation",
+          "formation": [
+            "return arg.orderData.formationName"
+          ]
+        },
+        {
+          "name": "MSG: NewOrder to soldiers",
+          "id": "f158a6d2-87c0-4c0d-97e2-13e84ded757c",
+          "type": "scriptAction",
+          "script": [
+            "loc.childElementsInPositions = InternalTable()",
+            "local listOfChildElements = orbat.GetChildElements()",
+            "local pointman = sensor.Evaluate(arg.orderData.sensors.Pointman)",
+            "",
+            "local newOrder = team.Reorder(listOfChildElements, pointman)",
+            "",
+            "message.SendOrder(",
+            "    pointman, -- receiver",
+            "    arg.orderData.childElementBtset, -- btset",
+            "    \"occupy\", -- behaviorName",
+            "    { -- behaviorParameters",
+            "        -- mandatory",
+            "        position = arg.orderData.position,",
+            "        -- optional",
+            "    },",
+            "    arg.orderData -- copy of current level orderData",
+            "    -- presetName (optional)",
+            "    -- overrides",
+            ")",
+            "",
+            "loc.childElementsInPositions[pointman] = false",
+            "",
+            "for i=1, #listOfChildElements do",
+            "    local childElement = listOfChildElements[i]",
+            "    if childElement ~= pointman then",
+            "        message.SendOrder(",
+            "            childElement, -- receiver",
+            "            arg.orderData.childElementBtset, -- btset",
+            "            \"follow\", -- behaviorName",
+            "            { -- behaviorParameters",
+            "                -- mandatory",
+            "                -- optional",
+            "            },",
+            "            arg.orderData -- copy of current level orderData",
+            "            -- presetName (optional)",
+            "            -- overrides",
+            "        )",
+            "    end",
+            "end",
+            "",
+            "-- pointman should be followed by others",
+            "sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, pointman)",
+            "",
+            "loc.debugTable = {",
+            "    listOfChildElements = listOfChildElements,",
+            "    pointman = pointman,",
+            "    position = arg.orderData.position,",
+            "    newOrder = newOrder,",
+            "}"
+          ]
+        },
+        {
+          "name": "childElementsInPositions",
+          "id": "a8eef11d-3003-40d4-ad92-262868c187d6",
+          "type": "waitUntil",
+          "condition": [
+            "local inPositionCounter = 0",
+            "local childElementsCounter = 0",
+            "",
+            "for childElement, inPosition in pairs(loc.childElementsInPositions) do",
+            "    if (childElement:Valid() and childElement:IsAlive()) then",
+            "        if (inPosition) then",
+            "            inPositionCounter = inPositionCounter + 1",
+            "        end",
+            "        childElementsCounter = childElementsCounter + 1",
+            "    end",
+            "end",
+            "",
+            "return inPositionCounter == childElementsCounter"
+          ]
+        },
+        {
+          "name": "MSG: OrderCompleted",
+          "id": "1c073d9e-225c-4389-97c3-37d6834af7f3",
+          "type": "scriptAction",
+          "script": [
+            "local receivers = message.MakeListOfReceivers(arg.orderData)",
+            "",
+            "message.ReportOrderCompleted(receivers, arg.orderData)"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OrderCompleted",
+      "id": "e5c5d253-8aa9-497a-850c-558252fe25ca",
+      "type": "messageHandler",
+      "handler": [
+        "loc.childElementsInPositions[msg.sender] = message.ValidateOrderCompleted(",
+        "    msg, -- full message table",
+        "    \"occupy\" -- behaviorName used in MSG sender script action",
+        ")"
+      ],
+      "subject": "OrderCompleted"
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "d181b79c-c380-4b19-90e2-960c35b0caec",
+        "position": "1693,378.75"
+      },
+      {
+        "id": "a86efe4e-f77c-4a87-8df8-9f44c659a6c1",
+        "position": "1875,573.25"
+      },
+      {
+        "id": "e055f566-1ab6-40cb-9d56-5397b75e29bc",
+        "position": "1439,574"
+      },
+      {
+        "id": "89545127-cadc-4772-b55e-b45d773cd7f9",
+        "position": "1662.5,173.25"
+      },
+      {
+        "id": "bef8c680-f41d-4a02-8a78-25b6d59c1c2c",
+        "position": "1662.5,260.75"
+      },
+      {
+        "id": "e45bb5f7-7321-48a1-9804-919c226e4e47",
+        "position": "1901.5,449"
+      },
+      {
+        "id": "c63c6104-7f9a-43a8-be61-eb7dfd8eb688",
+        "position": "1662.5,485.75"
+      },
+      {
+        "id": "ce692c7a-4864-4f6f-922e-2b8642d578db",
+        "position": "1264,611.5"
+      },
+      {
+        "id": "f158a6d2-87c0-4c0d-97e2-13e84ded757c",
+        "position": "1451.5,611.5"
+      },
+      {
+        "id": "a8eef11d-3003-40d4-ad92-262868c187d6",
+        "position": "1676.5,611.5"
+      },
+      {
+        "id": "1c073d9e-225c-4389-97c3-37d6834af7f3",
+        "position": "1887.5,610.75"
+      },
+      {
+        "id": "e5c5d253-8aa9-497a-850c-558252fe25ca",
+        "position": "1912.5,485.75"
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "a86efe4e-f77c-4a87-8df8-9f44c659a6c1",
+        "type": "comment",
+        "header": "Parent group & External",
+        "body": "",
+        "bodyAlignment": "Left",
+        "width": 199.0,
+        "height": 102.0,
+        "headerBackground": "#FFB26B00",
+        "headerForeground": "#FFFFFFFF",
+        "boxBackground": "#FF99FF00",
+        "boxForeground": "#FF000000"
+      },
+      {
+        "id": "e055f566-1ab6-40cb-9d56-5397b75e29bc",
+        "type": "comment",
+        "header": "occupy + follow",
+        "body": "",
+        "bodyAlignment": "Left",
+        "width": 223.0,
+        "height": 98.0,
+        "headerBackground": "#FFB26B00",
+        "headerForeground": "#FFFFFFFF",
+        "boxBackground": "#FF99FF00",
+        "boxForeground": "#FF000000"
+      },
+      {
+        "id": "89545127-cadc-4772-b55e-b45d773cd7f9",
+        "type": "comment",
+        "header": "Pointman exists",
+        "body": "Behavior assumes Pointman sensor returns valid value.",
+        "bodyAlignment": "Left",
+        "headerBackground": "#FFC4AA00",
+        "headerForeground": "#FFFFFFFF",
+        "boxBackground": "#FFFFD700",
+        "boxForeground": "#FF000000",
+        "width": 201.0,
+        "height": 74.0
+      },
+      {
+        "id": "bef8c680-f41d-4a02-8a78-25b6d59c1c2c",
+        "type": "comment",
+        "header": "Reports success",
+        "body": "Behavior is expected to autonomously reports its success to unit requested by order.",
+        "bodyAlignment": "Left",
+        "headerBackground": "#FF658720",
+        "headerForeground": "#FFFFFFFF",
+        "boxBackground": "#FF9ACD32",
+        "boxForeground": "#FF000000",
+        "width": 201.0,
+        "height": 87.0
+      },
+      {
+        "id": "e45bb5f7-7321-48a1-9804-919c226e4e47",
+        "type": "comment",
+        "header": "occupy",
+        "body": "",
+        "bodyAlignment": "Left",
+        "width": 168.0,
+        "height": 102.0,
+        "headerBackground": "#FFB26B00",
+        "headerForeground": "#FFFFFFFF",
+        "boxBackground": "#FF99FF00",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3840,2598.25",
+    "gridPadding": "0,10.75"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "childElementsInPositions": "return InternalTable()",
+    "debugTable": "return nil"
+  }
+}
