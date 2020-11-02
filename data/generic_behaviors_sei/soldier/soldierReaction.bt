@@ -1,0 +1,113 @@
+{
+  "name": "React or follow original order",
+  "id": "eab17055-7ec1-4b59-8394-1d38694c35ab",
+  "type": "selector",
+  "subtrees": [
+    {
+      "name": "<unnamed>",
+      "id": "c05138ac-4922-42bb-a5f1-375acc03b1f9",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "go crouch",
+          "id": "7895d901-936f-45e8-80e7-8c424382a61f",
+          "type": "setStance",
+          "stance": [
+            "return Stance.Crouched"
+          ]
+        },
+        {
+          "name": "Wait Forever",
+          "id": "b8fa6c7e-41ea-4073-a76a-e7521970957f",
+          "type": "waitForever"
+        }
+      ],
+      "decorators": [
+        {
+          "id": "60cac19e-e364-4b14-b3bb-72cb0d7a0b28",
+          "type": "scriptCondition",
+          "name": "direct world state condition",
+          "script": [
+            "local roe = bb.roe",
+            "local randomLimit = 4",
+            "",
+            "if roe ~= nil then",
+            "    if roe == 2 then",
+            "        randomLimit = 1",
+            "    end",
+            "end",
+            "",
+            "return math.random(randomLimit) > 2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Task behavior",
+      "id": "c9c58424-e44f-41cb-92e0-e397f8916221",
+      "type": "scriptedReference",
+      "target": "return arg.behaviorPath",
+      "arguments": {
+        "orderData": "return arg.orderData"
+      }
+    }
+  ],
+  "unlinked-trees": [
+    {
+      "name": "Reaction behavior (Fight)",
+      "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
+      "type": "scriptedReference",
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
+            "position": "1287.5,437.5"
+          }
+        ],
+        "editorObjects": []
+      },
+      "target": "return ",
+      "arguments": {
+        "orderData": "return arg.orderData"
+      }
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "eab17055-7ec1-4b59-8394-1d38694c35ab",
+        "position": "1762.5,112.5"
+      },
+      {
+        "id": "c05138ac-4922-42bb-a5f1-375acc03b1f9",
+        "position": "1519.5,219"
+      },
+      {
+        "id": "7895d901-936f-45e8-80e7-8c424382a61f",
+        "position": "1387.5,350"
+      },
+      {
+        "id": "b8fa6c7e-41ea-4073-a76a-e7521970957f",
+        "position": "1587.5,350"
+      },
+      {
+        "id": "c9c58424-e44f-41cb-92e0-e397f8916221",
+        "position": "1812.5,262.5"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2400"
+  },
+  "active": true,
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false
+    },
+    {
+      "name": "behaviorPath",
+      "isOptional": false
+    }
+  ],
+  "locals": {}
+}

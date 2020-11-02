@@ -47,6 +47,9 @@
     <Content Include="soldier\soldierMove.bt">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="soldier\soldierReaction.bt">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="tableExt.lua">
       <SubType>Content</SubType>
     </Content>

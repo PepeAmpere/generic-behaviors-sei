@@ -50,6 +50,26 @@
           "subject": "NewOrder"
         },
         {
+          "name": "NewRule",
+          "id": "e5bb4211-bd9f-4a12-a131-984df0a064a1",
+          "type": "messageHandler",
+          "handler": [
+            "local msgValue = msg.value",
+            "",
+            "local ruleName = msgValue.ruleName",
+            "local ruleValue = msgValue.ruleValue",
+            "",
+            "DebugLog(\"some message recieved\")",
+            "if",
+            "    ruleName ~= nil and",
+            "    ruleValue ~= nil",
+            "then",
+            "    bb[ruleName] = ruleValue",
+            "end"
+          ],
+          "subject": "NewRule"
+        },
+        {
           "name": "reset or order",
           "id": "486e08d2-8c27-4f05-95cd-77ad59cb1c41",
           "type": "selector",
@@ -169,7 +189,7 @@
       },
       {
         "id": "79f05ca0-ad55-4b1d-86f0-ef064dcc0873",
-        "position": "1812.5,417"
+        "position": "1837.5,392"
       },
       {
         "id": "9afa1a28-460e-4ba9-972b-740754a2f035",
@@ -177,11 +197,15 @@
       },
       {
         "id": "c6378205-e6c0-44b3-a23a-9a03babb7bc1",
-        "position": "1587.5,529.5"
+        "position": "1425,529.5"
       },
       {
         "id": "2574d24f-a996-4545-940c-54f9548845a4",
-        "position": "1812.5,542"
+        "position": "1637.5,529.5"
+      },
+      {
+        "id": "e5bb4211-bd9f-4a12-a131-984df0a064a1",
+        "position": "1862.5,529.5"
       },
       {
         "id": "486e08d2-8c27-4f05-95cd-77ad59cb1c41",
