@@ -9,9 +9,9 @@
       "type": "scriptAction",
       "script": [
         "local listOfChildElements = orbat.GetChildElements()",
-        "local pointman = sensor.Evaluate(arg.orderData.sensors.Pointman)",
+        "local pointman = listOfChildElements[1]",
         "",
-        "local newOrder = team.Reorder(listOfChildElements, pointman)",
+        "-- local newOrder = team.Reorder(listOfChildElements, pointman)",
         "",
         "message.SendOrder(",
         "    pointman, -- receiver",
@@ -48,7 +48,7 @@
         "end",
         "",
         "-- last guy in column should be followed by others",
-        "sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, listOfChildElements[#listOfChildElements])"
+        "-- sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, listOfChildElements[#listOfChildElements])"
       ]
     },
     {

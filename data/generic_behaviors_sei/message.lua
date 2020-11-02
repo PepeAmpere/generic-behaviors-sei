@@ -95,14 +95,18 @@ return {
             self:SendMessage(
                 receiver,
                 "NewOrder",
-                {
-                    btset = btset,
-                    behaviorName = behaviorName,
-                    behaviorParameters = behaviorParameters,
-                    parentOrderData = parentOrderData,
-                    presetName = presetName,
-                    overrides = overrides,
-                }
+                tableExt.Extend(
+                    {},
+                    {
+                        btset = btset,
+                        behaviorName = behaviorName,
+                        behaviorParameters = behaviorParameters,
+                        parentOrderData = parentOrderData,
+                        presetName = presetName,
+                        overrides = overrides,
+                    },
+                    behaviorParameters
+                )
             )
         end,
         

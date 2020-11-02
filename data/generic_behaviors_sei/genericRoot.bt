@@ -18,6 +18,7 @@
         "    },",
         "    team = {",
         "        [\"move\"] = {\"generic_behaviors_sei\", \"teamMoveInColumn\"}, --INPUTS: position",
+        "        [\"follow\"] = {\"generic_behaviors_sei\", \"teamFollowEntityInColumn\"}, --INPUTS: entity",
         "    },",
         "}",
         "",
