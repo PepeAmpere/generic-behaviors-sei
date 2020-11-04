@@ -1,0 +1,455 @@
+{
+  "name": "Wait Forever",
+  "id": "0aa6174f-6201-414c-9109-c65d2ac84401",
+  "type": "waitForever",
+  "unlinked-trees": [
+    {
+      "name": "fight",
+      "id": "743832a1-fd9a-45e1-9853-7b0c7f670a14",
+      "type": "selector",
+      "subtrees": [
+        {
+          "name": "tacticalAnalysis",
+          "id": "b6493481-1e79-4fd9-968d-7b89c137bf59",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "reset tacticalAnalyis",
+              "id": "ad36effc-e453-4a30-ad68-b0199a8127db",
+              "type": "scriptAction",
+              "script": [
+                "loc.tacticalAnalysis = {}"
+              ]
+            },
+            {
+              "name": "0.25s",
+              "id": "04f77aea-67ea-4589-8488-deaca295d50b",
+              "type": "wait",
+              "time": [
+                "return 0.25"
+              ]
+            },
+            {
+              "name": "check targets",
+              "id": "c55f6740-7c54-4abb-aa67-1506b4fc9515",
+              "type": "scriptAction",
+              "script": [
+                "local targets = arg.orderData.targets",
+                "local filteredTargets = {}",
+                "for target, targetData in pairs(targets) do",
+                "\tif orbat.IsAliveAndValid(target) and soldier.CanDestroy(target) then",
+                "        filteredTargets[#filteredTargets + 1] = target",
+                "\tend",
+                "end",
+                "",
+                "if #filteredTargets > 0 then",
+                "    local headOffset = Vec3(0,0,1.8)",
+                "    local myPosition = self:GetPosition()",
+                "    local raycasts = {}",
+                "    for i=1, #filteredTargets do",
+                "        local target = filteredTargets[i]",
+                "        local targetPosition = target:GetPosition()",
+                "        raycasts[#raycasts + 1] = Raycast(myPosition+headOffset, targetPosition+headOffset)",
+                "    end",
+                "    ",
+                "    loc.tacticalAnalysis.filteredTargets = filteredTargets",
+                "    loc.tacticalAnalysis.raycasts = raycasts",
+                "    return true",
+                "end",
+                "return false"
+              ]
+            },
+            {
+              "name": "pick target",
+              "id": "539e612b-1554-4606-afc7-d736d56c50b2",
+              "type": "waitUntil",
+              "condition": [
+                "local isReady = true",
+                "local raycasts = loc.tacticalAnalysis.raycasts",
+                "if #raycasts > 0 then",
+                "    for i=1, #raycasts do",
+                "        local raycast = raycasts[i]",
+                "        if not raycast:IsReady() then",
+                "            isReady = false",
+                "            break",
+                "        end",
+                "    end",
+                "end",
+                "",
+                "if isReady then",
+                "    loc.tacticalAnalysis.measures = {}",
+                "    for i=1, #loc.tacticalAnalysis.filteredTargets do",
+                "        local target = loc.tacticalAnalysis.filteredTargets[i]",
+                "        local targetPosition = target:GetPosition()",
+                "        local myPosition = self:GetPosition()",
+                "        local distance = targetPosition:Distance(myPosition)",
+                "        loc.tacticalAnalysis.measures[i] = {",
+                "            value = raycasts[i]:Value(),",
+                "            distance = distance,",
+                "        }",
+                "        if raycasts[i]:Value() > 0.95*distance then",
+                "            loc.tacticalAnalysis.targetToShoot = target",
+                "            break",
+                "        end",
+                "    end",
+                "end",
+                "",
+                "return isReady"
+              ]
+            },
+            {
+              "name": "Succeed",
+              "id": "cec3b195-8037-40bd-8a00-e2fd5110741c",
+              "type": "success",
+              "decorators": [
+                {
+                  "id": "1d5ecd33-339d-46c9-ae9c-4013655b4400",
+                  "type": "scriptCondition",
+                  "name": "target == nil",
+                  "script": [
+                    "return loc.tacticalAnalysis.targetToShoot == nil"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "2nd round",
+              "id": "ea022d10-119a-4860-ad0a-80dd43a55361",
+              "type": "scriptAction",
+              "script": [
+                "local filteredTargets = loc.tacticalAnalysis.filteredTargets",
+                "if #filteredTargets > 0 then",
+                "    local headOffset = Vec3(0,0,1.8)",
+                "    local myPosition = self:GetPosition()",
+                "    local paths = {}",
+                "    for i=1, #filteredTargets do",
+                "        local target = filteredTargets[i]",
+                "        local targetPosition = target:GetPosition()",
+                "        paths[#paths + 1] = FindPath(myPosition+headOffset, targetPosition+headOffset)",
+                "    end    ",
+                "    loc.tacticalAnalysis.paths = paths",
+                "    return true",
+                "end",
+                "return false"
+              ]
+            },
+            {
+              "name": "2nd round",
+              "id": "24f6eea6-960c-42b6-a19d-4880a2b69395",
+              "type": "waitUntil",
+              "condition": [
+                "local isReady = true",
+                "local paths = loc.tacticalAnalysis.paths",
+                "if #paths > 0 then",
+                "    for i=1, #paths do",
+                "        local path = paths[i]",
+                "        if not path:IsReady() then",
+                "            isReady = false",
+                "            break",
+                "        end",
+                "    end",
+                "end",
+                "",
+                "if isReady then",
+                "    loc.tacticalAnalysis.pathValues = {}",
+                "    local shortestPathLength = math.huge",
+                "    local shortestPath",
+                "    for i=1, #loc.tacticalAnalysis.filteredTargets do",
+                "        local target = loc.tacticalAnalysis.filteredTargets[i]",
+                "        local targetPosition = target:GetPosition()",
+                "        local myPosition = self:GetPosition()",
+                "        loc.tacticalAnalysis.pathValues[i] = loc.tacticalAnalysis.paths[i]:Value()",
+                "        if loc.tacticalAnalysis.pathValues[i]:Length() < shortestPathLength then",
+                "            shortestPath = loc.tacticalAnalysis.pathValues[i]",
+                "        end",
+                "        ",
+                "    end",
+                "    loc.tacticalAnalysis.targetToMove = shortestPath:PositionAlongPath(math.min(10,shortestPath:Length()))",
+                "end",
+                "    ",
+                "",
+                "return isReady"
+              ]
+            },
+            {
+              "name": "Wait Forever",
+              "id": "82ce8efe-d3ff-4ba5-80b3-7cf925204622",
+              "type": "waitForever",
+              "decorators": [
+                {
+                  "id": "65cec714-cd96-4b6c-8ddb-13d9c0bb4f1f",
+                  "type": "scriptCondition",
+                  "name": "targetToMove == nil",
+                  "script": [
+                    "return loc.tacticalAnalysis.targetToMove == nil"
+                  ]
+                }
+              ]
+            }
+          ],
+          "decorators": [
+            {
+              "id": "2392cedc-779f-48ec-8cb4-fcf1c31cecd4",
+              "type": "scriptCondition",
+              "name": "no tacticalAnalysis.targetToShoot",
+              "script": [
+                "return  (loc.tacticalAnalysis.targetToShoot == nil and",
+                "        loc.tacticalAnalysis.targetToMove == nil)"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fight",
+          "id": "717fa3ce-a256-4203-a1b1-06b40d916fde",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "suborderData",
+              "id": "c1afe4ea-617f-4e8d-8923-91b4f7fd9cc7",
+              "type": "scriptAction",
+              "script": [
+                "loc.suborderData = tableExt.Extend(",
+                "    {},",
+                "    arg.orderData,",
+                "    {",
+                "        position = loc.tacticalAnalysis.targetToMove,",
+                "        waitAfterFire = arg.orderData.roe.combatSituation[loc.combatSituation].waitAfterFire ",
+                "    }",
+                ")",
+                "    "
+              ]
+            },
+            {
+              "name": "Move towards the enemy",
+              "id": "a505b2fc-6636-4f68-b057-9c1a7f5a03b0",
+              "type": "reference",
+              "target": [
+                "generic_soldier",
+                "move"
+              ],
+              "arguments": {
+                "orderData": "return loc.suborderData"
+              }
+            },
+            {
+              "name": "invalidate target",
+              "id": "91c93bb5-a320-432c-bad3-1bf221c1c79d",
+              "type": "scriptAction",
+              "script": [
+                "loc.tacticalAnalysis.targetToMove = nil"
+              ]
+            },
+            {
+              "name": "1s",
+              "id": "e01bce9d-a360-4860-a1e1-47da772a1648",
+              "type": "wait",
+              "time": [
+                "return 1"
+              ]
+            }
+          ],
+          "decorators": [
+            {
+              "id": "4daa9047-4b52-4bb6-8640-b9a1cf8a4394",
+              "type": "scriptCondition",
+              "name": "target not dead",
+              "script": [
+                "return loc.tacticalAnalysis.targetToMove ~= nil"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "fight",
+          "id": "81f43c59-1180-4496-8789-5e96399afa20",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "suborderData",
+              "id": "8d875e80-8abd-46ec-b41c-01edc1631208",
+              "type": "scriptAction",
+              "script": [
+                "loc.suborderData = tableExt.Extend(",
+                "    {},",
+                "    arg.orderData,",
+                "    {",
+                "        target = loc.tacticalAnalysis.targetToShoot,",
+                "        waitAfterFire = arg.orderData.roe.combatSituation[loc.combatSituation].waitAfterFire ",
+                "    }",
+                ")",
+                "    "
+              ]
+            },
+            {
+              "name": "Fire at any enemy",
+              "id": "67036aa1-8c0a-4451-8abe-d24c287d6877",
+              "type": "reference",
+              "decorators": [
+                {
+                  "id": "dbcfa861-1e18-47f5-a19b-2e1d06fe3d44",
+                  "type": "succeeder",
+                  "name": "Always Succeed"
+                },
+                {
+                  "id": "0a084125-dbf9-4977-9fc9-0efe875d86c2",
+                  "type": "scriptCondition",
+                  "name": "target not dead and can destroy",
+                  "script": [
+                    "return orbat.IsAliveAndValid(loc.tacticalAnalysis.targetToShoot) and soldier.CanDestroy(loc.tacticalAnalysis.targetToShoot)"
+                  ]
+                }
+              ],
+              "target": [
+                "generic_soldier",
+                "fireAtWill"
+              ],
+              "arguments": {
+                "orderData": "return loc.suborderData"
+              }
+            },
+            {
+              "name": "invalidate target",
+              "id": "bba01d28-6d65-4f98-b0d9-754ffaa89842",
+              "type": "scriptAction",
+              "script": [
+                "loc.tacticalAnalysis.targetToShoot = nil"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "invalidate target",
+          "id": "72fe6dd7-1f35-4169-8cc7-b5f3efa067dc",
+          "type": "scriptAction",
+          "script": [
+            "loc.tacticalAnalysis.targetToShoot = nil"
+          ]
+        }
+      ],
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "743832a1-fd9a-45e1-9853-7b0c7f670a14",
+            "position": "2329,207.25"
+          },
+          {
+            "id": "b6493481-1e79-4fd9-968d-7b89c137bf59",
+            "position": "1254,369.75"
+          },
+          {
+            "id": "ad36effc-e453-4a30-ad68-b0199a8127db",
+            "position": "516.5,494.75"
+          },
+          {
+            "id": "04f77aea-67ea-4589-8488-deaca295d50b",
+            "position": "704,494.75"
+          },
+          {
+            "id": "c55f6740-7c54-4abb-aa67-1506b4fc9515",
+            "position": "866.5,494.75"
+          },
+          {
+            "id": "539e612b-1554-4606-afc7-d736d56c50b2",
+            "position": "1029,494.75"
+          },
+          {
+            "id": "cec3b195-8037-40bd-8a00-e2fd5110741c",
+            "position": "1204,494.75"
+          },
+          {
+            "id": "ea022d10-119a-4860-ad0a-80dd43a55361",
+            "position": "1366.5,494.75"
+          },
+          {
+            "id": "24f6eea6-960c-42b6-a19d-4880a2b69395",
+            "position": "1529,494.75"
+          },
+          {
+            "id": "82ce8efe-d3ff-4ba5-80b3-7cf925204622",
+            "position": "1716.5,482.25"
+          },
+          {
+            "id": "717fa3ce-a256-4203-a1b1-06b40d916fde",
+            "position": "1898.89285714286,552.928571428572"
+          },
+          {
+            "id": "c1afe4ea-617f-4e8d-8923-91b4f7fd9cc7",
+            "position": "1716.5,707.25"
+          },
+          {
+            "id": "a505b2fc-6636-4f68-b057-9c1a7f5a03b0",
+            "position": "1879,707.25"
+          },
+          {
+            "id": "91c93bb5-a320-432c-bad3-1bf221c1c79d",
+            "position": "2079,707.25",
+            "height": 51.428571428571558
+          },
+          {
+            "id": "e01bce9d-a360-4860-a1e1-47da772a1648",
+            "position": "2241.5,707.25"
+          },
+          {
+            "id": "81f43c59-1180-4496-8789-5e96399afa20",
+            "position": "2554,457.25"
+          },
+          {
+            "id": "8d875e80-8abd-46ec-b41c-01edc1631208",
+            "position": "2404,707.25"
+          },
+          {
+            "id": "67036aa1-8c0a-4451-8abe-d24c287d6877",
+            "position": "2566.5,694.75"
+          },
+          {
+            "id": "bba01d28-6d65-4f98-b0d9-754ffaa89842",
+            "position": "2841.5,694.75"
+          },
+          {
+            "id": "72fe6dd7-1f35-4169-8cc7-b5f3efa067dc",
+            "position": "2816.5,394.75"
+          }
+        ],
+        "editorObjects": []
+      },
+      "active": true
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "0aa6174f-6201-414c-9109-c65d2ac84401",
+        "position": "2150,139.5"
+      },
+      {
+        "id": "e4f5d658-0111-41d2-9986-92d37b9fbf29",
+        "position": "698,461.75"
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "e4f5d658-0111-41d2-9986-92d37b9fbf29",
+        "type": "comment",
+        "header": "to avoid perf heavy loop",
+        "body": "",
+        "bodyAlignment": "Left",
+        "width": 162.0,
+        "height": 94.9999999999988,
+        "headerBackground": "#FF00FF00",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FF90EE90",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3840,2528",
+    "gridPadding": "0,2"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false
+    }
+  ],
+  "locals": {}
+}

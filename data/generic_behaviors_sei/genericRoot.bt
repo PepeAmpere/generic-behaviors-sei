@@ -4,6 +4,18 @@
   "type": "sequence",
   "subtrees": [
     {
+      "name": "rulesDefaults",
+      "id": "0a348f95-9553-4e01-9031-7ddefc0594ae",
+      "type": "scriptAction",
+      "script": [
+        "bb.rules = {",
+        "    roe = 0,",
+        "    reactionDistanceTrigger = 50, -- meters",
+        "    reactionDistancePursue = 75, -- meters",
+        "}"
+      ]
+    },
+    {
       "name": "ordersMapping",
       "id": "79f05ca0-ad55-4b1d-86f0-ef064dcc0873",
       "type": "scriptAction",
@@ -12,20 +24,32 @@
         "    soldier = {",
         "        -- [\"behaviorName\"] = {\"btsetName\", \"treeName\"}",
         "        -- [\"randomMove\"] = {\"generic_behaviors_sei\", \"randomMove\"},",
+        "        -- HIGH LEVEL AUTONOMOUS",
         "        [\"follow\"] = {\"generic_behaviors_sei\", \"soldierFollow\"}, -- INPUTS: entity",
+        "        [\"occupy\"] = {\"generic_behaviors_sei\", \"soldierOccupy\"}, --INPUTS: position",
+        "                ",
+        "        -- LOW LEVEL (without reaction)",
+        "        [\"fight\"] = {\"generic_behaviors_sei\", \"soldierFight\"},",
+        "        [\"followEntity\"] = {\"generic_behaviors_sei\", \"soldierFollowEntity\"}, --INPUTS: entity",
+        "        [\"followFormation\"] = {\"generic_behaviors_sei\", \"soldierFollowFormation\"},",
+        "        [\"genericReaction\"] = {\"generic_behaviors_sei\", \"soldierReaction\"}, --INPUTS: target, boundaries",
         "        [\"move\"] = {\"generic_behaviors_sei\", \"soldierMove\"}, --INPUTS: position",
-        "        [\"occupy\"] = {\"generic_behaviors_sei\", \"soldierMove\"}, --INPUTS: position",
         "    },",
         "    team = {",
-        "        [\"move\"] = {\"generic_behaviors_sei\", \"teamMoveInColumn\"}, --INPUTS: position",
+        "        -- HIGH LEVEL AUTONOMOUS",
+        "        [\"occupy\"] = {\"generic_behaviors_sei\", \"teamMoveInColumn\"}, --INPUTS: position",
+        "        ",
+        "        -- LOW LEVEL (without reaction)",
         "        [\"follow\"] = {\"generic_behaviors_sei\", \"teamFollowEntityInColumn\"}, --INPUTS: entity",
+        "        [\"genericReaction\"] = {\"generic_behaviors_sei\", \"teamGenericReaction\"}, ---INPUTS: target, boundaries",
+        "        [\"move\"] = {\"generic_behaviors_sei\", \"teamMoveInColumn\"}, --INPUTS: position        ",
         "    },",
         "}",
         "",
         "if self.GetEntities then -- we know you are team",
-        "    loc.ordersMapping = ordersMapping.team",
+        "    bb.ordersMapping = ordersMapping.team",
         "else",
-        "    loc.ordersMapping = ordersMapping.soldier",
+        "    bb.ordersMapping = ordersMapping.soldier",
         "end"
       ]
     },
@@ -59,12 +83,13 @@
             "local ruleName = msgValue.ruleName",
             "local ruleValue = msgValue.ruleValue",
             "",
-            "DebugLog(\"some message recieved\")",
+            "DebugLog(self .. \" - NEW RULE received: [\" .. ruleName .. \"] = \" .. ruleValue)",
+            "",
             "if",
             "    ruleName ~= nil and",
             "    ruleValue ~= nil",
             "then",
-            "    bb[ruleName] = ruleValue",
+            "    bb.rules[ruleName] = ruleValue",
             "end"
           ],
           "subject": "NewRule"
@@ -128,7 +153,7 @@
                       "name": "Selected behavior",
                       "id": "89309ddd-9238-4e6c-94ca-afbc0c4630b9",
                       "type": "scriptedReference",
-                      "target": "return loc.ordersMapping[loc.newOrderData.behaviorName]",
+                      "target": "return bb.ordersMapping[loc.newOrderData.behaviorName]",
                       "arguments": {
                         "orderData": "return loc.newOrderData"
                       }
@@ -188,8 +213,13 @@
         "position": "2312.5,604.5"
       },
       {
+        "id": "0a348f95-9553-4e01-9031-7ddefc0594ae",
+        "position": "1675,392",
+        "height": 50.0
+      },
+      {
         "id": "79f05ca0-ad55-4b1d-86f0-ef064dcc0873",
-        "position": "1837.5,392"
+        "position": "1862.5,392"
       },
       {
         "id": "9afa1a28-460e-4ba9-972b-740754a2f035",

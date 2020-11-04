@@ -1,0 +1,50 @@
+{
+  "name": "move and observe",
+  "id": "3187b03f-21a9-456e-a1e8-a44c3afdd55f",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Do reaction OR move",
+      "id": "d09dc847-c560-44ef-bc69-c59527a71748",
+      "type": "reference",
+      "target": [
+        "generic_behaviors_sei",
+        "soldierReaction"
+      ],
+      "arguments": {
+        "orderData": "return arg.orderData",
+        "defaultBehaviorPath": "bb.ordersMapping.move"
+      }
+    },
+    {
+      "name": "Observe placehoder",
+      "id": "3c0469d0-92a4-4f41-9417-0ed5a023f9b1",
+      "type": "waitForever"
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "3187b03f-21a9-456e-a1e8-a44c3afdd55f",
+        "position": "1900,112.5"
+      },
+      {
+        "id": "d09dc847-c560-44ef-bc69-c59527a71748",
+        "position": "1737.5,237.5"
+      },
+      {
+        "id": "3c0469d0-92a4-4f41-9417-0ed5a023f9b1",
+        "position": "2025,237.5"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2400"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false
+    }
+  ],
+  "locals": {}
+}

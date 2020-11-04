@@ -1,113 +1,289 @@
 {
-  "name": "React or follow original order",
-  "id": "eab17055-7ec1-4b59-8394-1d38694c35ab",
-  "type": "selector",
+  "name": "<unnamed>",
+  "id": "0ef8422b-cac8-4a77-bdb4-7df9b6ca77cf",
+  "type": "supervisedParallel",
   "subtrees": [
     {
-      "name": "<unnamed>",
-      "id": "c05138ac-4922-42bb-a5f1-375acc03b1f9",
-      "type": "sequence",
+      "name": "React or follow original order",
+      "id": "eab17055-7ec1-4b59-8394-1d38694c35ab",
+      "type": "selector",
       "subtrees": [
         {
-          "name": "go crouch",
-          "id": "7895d901-936f-45e8-80e7-8c424382a61f",
-          "type": "setStance",
-          "stance": [
-            "return Stance.Crouched"
+          "name": "reaction ending sequence",
+          "id": "577c6232-1b53-463f-aa11-fd99f8bc8640",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "reactionRadiusCenter",
+              "id": "41429fe3-893d-4eed-a0b0-8e2f5b41be8d",
+              "type": "scriptAction",
+              "script": [
+                "loc.reactionRadiusCenter = self:GetPosition()"
+              ]
+            },
+            {
+              "name": "react + check to stay in",
+              "id": "af007148-9c85-483a-9357-fe3a0c477f94",
+              "type": "parallel",
+              "subtrees": [
+                {
+                  "name": "react",
+                  "id": "3433d5b9-5598-4ccd-a993-8f8a61bf868c",
+                  "type": "sequence",
+                  "subtrees": [
+                    {
+                      "name": "Reaction behavior (Fight)",
+                      "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
+                      "type": "scriptedReference",
+                      "target": "return bb.ordersMapping.fight",
+                      "arguments": {
+                        "orderData": "return arg.orderData"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "check",
+                  "id": "cd97c7e2-869e-4fbb-be00-620b8517c50f",
+                  "type": "sequence",
+                  "subtrees": [
+                    {
+                      "name": "reactionRadiusCenter",
+                      "id": "90daed11-a551-4d6b-8be7-7e69bbeb2e7b",
+                      "type": "waitUntil",
+                      "condition": [
+                        "return loc.reactionRadiusCenter ~= nil"
+                      ]
+                    },
+                    {
+                      "name": "target alive",
+                      "id": "75989848-a334-4e8c-a4c3-67fd8b58782b",
+                      "type": "waitUntil",
+                      "condition": [
+                        "if loc.reactionTarget == nil then",
+                        "    return true",
+                        "end",
+                        "",
+                        "if not loc.reactionTarget:Valid() then",
+                        "    return true",
+                        "end",
+                        "",
+                        "if not loc.reactionTarget:IsAlive() then",
+                        "    return true",
+                        "end",
+                        "",
+                        "if self:GetPosition():Distance(loc.reactionTarget:GetPosition()) > bb.rules.reactionDistancePursue then",
+                        "    return true",
+                        "end",
+                        "",
+                        "return false"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "waitForAll": false
+            },
+            {
+              "name": "clean and fail",
+              "id": "85fd28d4-841f-4a1b-94bf-aebefe7df751",
+              "type": "scriptAction",
+              "script": [
+                "loc.reactionRadiusCenter = nil",
+                "loc.reactionTarget = nil",
+                "loc.reactionStarted = nil",
+                "return false"
+              ]
+            }
+          ],
+          "decorators": [
+            {
+              "id": "60cac19e-e364-4b14-b3bb-72cb0d7a0b28",
+              "type": "scriptCondition",
+              "name": "skip if bb.roe == 2",
+              "script": [
+                "local roe = bb.rules.roe",
+                "",
+                "if roe ~= nil then",
+                "    if roe == 2 then",
+                "        return false",
+                "    end",
+                "end",
+                "",
+                "return true"
+              ]
+            },
+            {
+              "id": "9859136c-d2ca-4c16-8742-b95f147245b4",
+              "type": "scriptCondition",
+              "name": "reactionStarted",
+              "script": [
+                "return loc.reactionStarted == true"
+              ]
+            }
           ]
         },
         {
-          "name": "Wait Forever",
-          "id": "b8fa6c7e-41ea-4073-a76a-e7521970957f",
-          "type": "waitForever"
+          "name": "Task behavior",
+          "id": "c9c58424-e44f-41cb-92e0-e397f8916221",
+          "type": "scriptedReference",
+          "target": "return arg.defaultBehaviorPath",
+          "arguments": {
+            "orderData": "return arg.orderData"
+          }
+        }
+      ],
+      "active": true
+    },
+    {
+      "name": "<unnamed>",
+      "id": "14d45bf8-7d72-4150-a41d-8117a8d4fae4",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "get entities",
+          "id": "c044d3b6-a034-4035-9c11-7e1e6f241307",
+          "type": "scriptAction",
+          "script": [
+            "loc.newTargets = GetEntitiesInArea(Circle(self:GetPosition(), 100), { hasBrain = true, enemyOf = self })"
+          ]
+        },
+        {
+          "name": "check if reactionStarted",
+          "id": "7258f19e-15b8-4a83-b043-d937427af563",
+          "type": "scriptAction",
+          "script": [
+            "local targets = loc.newTargets",
+            "",
+            "if ",
+            "    loc.reactionStarted == nil or",
+            "    loc.reactionStarted == false",
+            "",
+            "then",
+            "    -- temporary distance check, later use path",
+            "    for i=1, #targets do",
+            "        if self:GetPosition():Distance(targets[i]:GetPosition()) < bb.rules.reactionDistanceTrigger then",
+            "            loc.reactionStarted = true",
+            "            loc.reactionTarget = targets[i]",
+            "            break",
+            "        end ",
+            "    end",
+            "end"
+          ]
+        },
+        {
+          "name": "0.5 second",
+          "id": "fff38a88-8d1e-43f7-9193-3c6b00031b9d",
+          "type": "wait",
+          "time": [
+            "return 0.5"
+          ]
         }
       ],
       "decorators": [
         {
-          "id": "60cac19e-e364-4b14-b3bb-72cb0d7a0b28",
+          "id": "2e2f6017-b370-494f-9234-96121c544b7b",
+          "type": "succeeder",
+          "name": "Always Succeed"
+        },
+        {
+          "id": "15b2480d-3dfb-44f1-9fa1-26dcc292c26e",
           "type": "scriptCondition",
-          "name": "direct world state condition",
+          "name": "<unnamed>",
           "script": [
-            "local roe = bb.roe",
-            "local randomLimit = 4",
-            "",
-            "if roe ~= nil then",
-            "    if roe == 2 then",
-            "        randomLimit = 1",
-            "    end",
-            "end",
-            "",
-            "return math.random(randomLimit) > 2"
+            "return loc.reactionRadiusCenter == nil"
           ]
         }
       ]
-    },
-    {
-      "name": "Task behavior",
-      "id": "c9c58424-e44f-41cb-92e0-e397f8916221",
-      "type": "scriptedReference",
-      "target": "return arg.behaviorPath",
-      "arguments": {
-        "orderData": "return arg.orderData"
-      }
-    }
-  ],
-  "unlinked-trees": [
-    {
-      "name": "Reaction behavior (Fight)",
-      "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
-      "type": "scriptedReference",
-      "meta": {
-        "nodesInfo": [
-          {
-            "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
-            "position": "1287.5,437.5"
-          }
-        ],
-        "editorObjects": []
-      },
-      "target": "return ",
-      "arguments": {
-        "orderData": "return arg.orderData"
-      }
     }
   ],
   "meta": {
     "nodesInfo": [
       {
+        "id": "0ef8422b-cac8-4a77-bdb4-7df9b6ca77cf",
+        "position": "1687.5,119.899761904762"
+      },
+      {
         "id": "eab17055-7ec1-4b59-8394-1d38694c35ab",
-        "position": "1762.5,112.5"
+        "position": "1662.5,357.399761904762"
       },
       {
-        "id": "c05138ac-4922-42bb-a5f1-375acc03b1f9",
-        "position": "1519.5,219"
+        "id": "577c6232-1b53-463f-aa11-fd99f8bc8640",
+        "position": "1200,407.399761904762"
       },
       {
-        "id": "7895d901-936f-45e8-80e7-8c424382a61f",
-        "position": "1387.5,350"
+        "id": "41429fe3-893d-4eed-a0b0-8e2f5b41be8d",
+        "position": "937.5,607.399761904762"
       },
       {
-        "id": "b8fa6c7e-41ea-4073-a76a-e7521970957f",
-        "position": "1587.5,350"
+        "id": "af007148-9c85-483a-9357-fe3a0c477f94",
+        "position": "1125,607.399761904762"
+      },
+      {
+        "id": "3433d5b9-5598-4ccd-a993-8f8a61bf868c",
+        "position": "1062.5,707.399761904762"
+      },
+      {
+        "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
+        "position": "1037.5,807.399761904762"
+      },
+      {
+        "id": "cd97c7e2-869e-4fbb-be00-620b8517c50f",
+        "position": "1262.5,707.399761904762"
+      },
+      {
+        "id": "90daed11-a551-4d6b-8be7-7e69bbeb2e7b",
+        "position": "1275,819.899761904762"
+      },
+      {
+        "id": "75989848-a334-4e8c-a4c3-67fd8b58782b",
+        "position": "1462.5,819.899761904762"
+      },
+      {
+        "id": "85fd28d4-841f-4a1b-94bf-aebefe7df751",
+        "position": "1325,607.399761904762"
       },
       {
         "id": "c9c58424-e44f-41cb-92e0-e397f8916221",
-        "position": "1812.5,262.5"
+        "position": "1700,569.899761904762"
+      },
+      {
+        "id": "14d45bf8-7d72-4150-a41d-8117a8d4fae4",
+        "position": "2287.5,169.899761904762"
+      },
+      {
+        "id": "c044d3b6-a034-4035-9c11-7e1e6f241307",
+        "position": "2262.5,382.399761904762"
+      },
+      {
+        "id": "7258f19e-15b8-4a83-b043-d937427af563",
+        "position": "2425,382.399761904762"
+      },
+      {
+        "id": "fff38a88-8d1e-43f7-9193-3c6b00031b9d",
+        "position": "2750,382.399761904762"
       }
     ],
     "editorObjects": [],
-    "canvasSize": "3840,2400"
+    "canvasSize": "3840,2757.39976190476",
+    "gridPadding": "0,7.39976190476193"
   },
-  "active": true,
   "parameters": [
     {
       "name": "orderData",
-      "isOptional": false
+      "isOptional": false,
+      "defaultValue": ""
     },
     {
-      "name": "behaviorPath",
-      "isOptional": false
+      "name": "defaultBehaviorPath",
+      "isOptional": false,
+      "defaultValue": ""
     }
   ],
-  "locals": {}
+  "locals": {
+    "reactionRadiusCenter": "return nil",
+    "reactionTarget": "return nil",
+    "reactionStarted": "return nil",
+    "newTargets": "return nil"
+  }
 }

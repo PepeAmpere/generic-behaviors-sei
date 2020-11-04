@@ -28,12 +28,12 @@
           ],
           "arguments": {
             "orderData": "return arg.orderData",
-            "behaviorPath": "return {\"generic_behaviors_sei\", \"soldierFollowEntity\"}"
+            "defaultBehaviorPath": "bb.ordersMapping.followEntity"
           }
         },
         {
           "name": "Do reaction OR followFormation",
-          "id": "394ba8ff-eeff-416c-9157-8602abb6cb5e",
+          "id": "416847af-feb4-4163-80e7-827039e5bc5b",
           "type": "reference",
           "target": [
             "generic_behaviors_sei",
@@ -41,7 +41,7 @@
           ],
           "arguments": {
             "orderData": "return arg.orderData",
-            "behaviorPath": "return {\"generic_behaviors_sei\", \"soldierFollowFormation\"}"
+            "defaultBehaviorPath": "bb.ordersMapping.followFormation"
           }
         }
       ],
@@ -119,11 +119,11 @@
       },
       {
         "id": "2fe1898a-8366-4e57-bf55-b177dbb5fd0d",
-        "position": "1237.5,523.875"
+        "position": "1250,523.875"
       },
       {
-        "id": "394ba8ff-eeff-416c-9157-8602abb6cb5e",
-        "position": "1475,561.375"
+        "id": "416847af-feb4-4163-80e7-827039e5bc5b",
+        "position": "1537.5,573.875"
       },
       {
         "id": "48cc34a6-9560-4b17-9eb0-58331ee3c939",
