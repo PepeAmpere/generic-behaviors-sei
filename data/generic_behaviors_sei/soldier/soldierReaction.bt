@@ -145,9 +145,9 @@
           "id": "c044d3b6-a034-4035-9c11-7e1e6f241307",
           "type": "scriptAction",
           "script": [
-            "loc.newTargets = self:GetVisibleEnemies(100)",
+            "loc.newTargets = self:GetVisibleEnemies(400)",
             "",
-            "--GetEntitiesInArea(Circle(self:GetPosition(), 100), { hasBrain = true, enemyOf = self })"
+            "--GetEntitiesInArea(Circle(self:GetPosition(), 400), { hasBrain = true, enemyOf = self })"
           ]
         },
         {
@@ -205,72 +205,72 @@
     "nodesInfo": [
       {
         "id": "0ef8422b-cac8-4a77-bdb4-7df9b6ca77cf",
-        "position": "1687.5,119.899761904762"
+        "position": "1687.5,152.899761904762"
       },
       {
         "id": "eab17055-7ec1-4b59-8394-1d38694c35ab",
-        "position": "1662.5,357.399761904762"
+        "position": "1662.5,390.399761904762"
       },
       {
         "id": "577c6232-1b53-463f-aa11-fd99f8bc8640",
-        "position": "1200,407.399761904762"
+        "position": "1200,440.399761904762"
       },
       {
         "id": "41429fe3-893d-4eed-a0b0-8e2f5b41be8d",
-        "position": "937.5,607.399761904762"
+        "position": "937.5,640.399761904762"
       },
       {
         "id": "af007148-9c85-483a-9357-fe3a0c477f94",
-        "position": "1125,607.399761904762"
+        "position": "1125,640.399761904762"
       },
       {
         "id": "3433d5b9-5598-4ccd-a993-8f8a61bf868c",
-        "position": "1062.5,707.399761904762"
+        "position": "1062.5,740.399761904762"
       },
       {
         "id": "1113daa8-fdf3-4aae-9bbc-b8331e3289bf",
-        "position": "1037.5,807.399761904762"
+        "position": "1037.5,840.399761904762"
       },
       {
         "id": "cd97c7e2-869e-4fbb-be00-620b8517c50f",
-        "position": "1262.5,707.399761904762"
+        "position": "1262.5,740.399761904762"
       },
       {
         "id": "90daed11-a551-4d6b-8be7-7e69bbeb2e7b",
-        "position": "1275,819.899761904762"
+        "position": "1275,852.899761904762"
       },
       {
         "id": "75989848-a334-4e8c-a4c3-67fd8b58782b",
-        "position": "1462.5,819.899761904762"
+        "position": "1462.5,852.899761904762"
       },
       {
         "id": "85fd28d4-841f-4a1b-94bf-aebefe7df751",
-        "position": "1325,607.399761904762"
+        "position": "1325,640.399761904762"
       },
       {
         "id": "c9c58424-e44f-41cb-92e0-e397f8916221",
-        "position": "1700,569.899761904762"
+        "position": "1700,602.899761904762"
       },
       {
         "id": "14d45bf8-7d72-4150-a41d-8117a8d4fae4",
-        "position": "2287.5,169.899761904762"
+        "position": "2287.5,202.899761904762"
       },
       {
         "id": "c044d3b6-a034-4035-9c11-7e1e6f241307",
-        "position": "2262.5,382.399761904762"
+        "position": "2262.5,415.399761904762"
       },
       {
         "id": "7258f19e-15b8-4a83-b043-d937427af563",
-        "position": "2425,382.399761904762"
+        "position": "2425,415.399761904762"
       },
       {
         "id": "fff38a88-8d1e-43f7-9193-3c6b00031b9d",
-        "position": "2750,382.399761904762"
+        "position": "2750,415.399761904762"
       }
     ],
     "editorObjects": [],
-    "canvasSize": "3840,2757.39976190476",
-    "gridPadding": "0,7.39976190476193"
+    "canvasSize": "3840,2790.39976190476",
+    "gridPadding": "0,2.89976190476193"
   },
   "parameters": [
     {

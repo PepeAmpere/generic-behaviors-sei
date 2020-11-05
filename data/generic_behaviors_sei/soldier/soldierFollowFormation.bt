@@ -139,9 +139,16 @@
           ]
         },
         {
-          "name": "Wait Forever",
-          "id": "217a35b6-0262-4a09-a061-437a418b045a",
-          "type": "waitForever"
+          "name": "Idle",
+          "id": "94047f66-c427-4edc-b013-21c19c5f0f5c",
+          "type": "reference",
+          "target": [
+            "generic_behaviors_sei",
+            "soldierIdle"
+          ],
+          "arguments": {
+            "orderData": "return arg.orderData"
+          }
         }
       ],
       "active": true
@@ -215,20 +222,6 @@
         "nodesInfo": [
           {
             "id": "0176ebb4-4d87-4784-9732-ec2ba2ba48db",
-            "position": "812.5,688"
-          }
-        ],
-        "editorObjects": []
-      }
-    },
-    {
-      "name": "PLACEHOLDER: Set heading",
-      "id": "a595c50e-81a8-4feb-b2d2-0ce1c57eb760",
-      "type": "success",
-      "meta": {
-        "nodesInfo": [
-          {
-            "id": "a595c50e-81a8-4feb-b2d2-0ce1c57eb760",
             "position": "1025,688"
           }
         ],
@@ -283,8 +276,8 @@
         "position": "2262.5,925.5"
       },
       {
-        "id": "217a35b6-0262-4a09-a061-437a418b045a",
-        "position": "2012.5,538"
+        "id": "94047f66-c427-4edc-b013-21c19c5f0f5c",
+        "position": "2000,513"
       },
       {
         "id": "bea8cd80-d79e-4199-bc62-58ae9b5ffc41",

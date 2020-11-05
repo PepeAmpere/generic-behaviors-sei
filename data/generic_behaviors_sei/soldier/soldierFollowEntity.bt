@@ -274,9 +274,16 @@
               ]
             },
             {
-              "name": "Wait Forever",
-              "id": "ae921d46-45df-4983-beba-9b21e37bbb09",
-              "type": "waitForever"
+              "name": "Idle",
+              "id": "d5d2b2bc-21e9-42aa-98c3-816cc37cd5ab",
+              "type": "reference",
+              "target": [
+                "generic_behaviors_sei",
+                "soldierIdle"
+              ],
+              "arguments": {
+                "orderData": "return arg.orderData"
+              }
             }
           ],
           "active": true
@@ -299,7 +306,7 @@
               "id": "0fc4f79f-80a8-4f56-9df5-646a8b097d43",
               "type": "scriptAction",
               "script": [
-                "if orbat.IsAliveAndValid(loc.entityToFollow) and loc.entityToFollow.GetChildGroupCount == nil then -- not group",
+                "if orbat.IsAliveAndValid(loc.entityToFollow) then -- not group",
                 "    local newPosition = loc.entityToFollow:GetPosition()",
                 "    if loc.lastPosition == nil then ",
                 "        loc.lastPosition = newPosition",
@@ -342,21 +349,7 @@
         "nodesInfo": [
           {
             "id": "233a639e-e7db-4828-8458-cf867f880da6",
-            "position": "512.5,983.353968253968"
-          }
-        ],
-        "editorObjects": []
-      }
-    },
-    {
-      "name": "PLACEHOLDER: Set heading",
-      "id": "b79c13a6-ffd7-4da3-ab67-4a8105d48bd6",
-      "type": "success",
-      "meta": {
-        "nodesInfo": [
-          {
-            "id": "b79c13a6-ffd7-4da3-ab67-4a8105d48bd6",
-            "position": "725,983.353968253968"
+            "position": "737.5,983.353968253968"
           }
         ],
         "editorObjects": []
@@ -468,8 +461,8 @@
         "position": "3100,1270.85396825396"
       },
       {
-        "id": "ae921d46-45df-4983-beba-9b21e37bbb09",
-        "position": "1962.5,795.853968253968"
+        "id": "d5d2b2bc-21e9-42aa-98c3-816cc37cd5ab",
+        "position": "1950,783.353968253968"
       },
       {
         "id": "49df6373-5e00-4ecd-b3f9-26c3d9d659c8",
