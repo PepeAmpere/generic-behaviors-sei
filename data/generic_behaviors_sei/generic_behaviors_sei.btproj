@@ -29,6 +29,12 @@
     <Content Include="soldier\soldierDismount.bt">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="soldier\soldierFight.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierFireAtWill.bt">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="soldier\soldierFollow.bt">
       <SubType>Content</SubType>
     </Content>
@@ -45,6 +51,12 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="soldier\soldierMove.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierObserve.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="soldier\soldierOccupy.bt">
       <SubType>Content</SubType>
     </Content>
     <Content Include="soldier\soldierReaction.bt">

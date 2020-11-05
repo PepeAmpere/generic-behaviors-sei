@@ -4,6 +4,14 @@
   "type": "sequence",
   "subtrees": [
     {
+      "name": "Reset heading",
+      "id": "07e6944e-0515-453f-81ac-7f6e5cdb2e6c",
+      "type": "scriptAction",
+      "script": [
+        "self:ReqHeadingFormationIfStationary()"
+      ]
+    },
+    {
       "name": "(re)set stance",
       "id": "f779ea46-302e-4600-b020-b60781296bc2",
       "type": "setStance",
@@ -292,20 +300,6 @@
         ],
         "editorObjects": []
       }
-    },
-    {
-      "name": "PLACEHOLDER: Set heading",
-      "id": "a424536a-db37-4795-854d-e5c604524558",
-      "type": "success",
-      "meta": {
-        "nodesInfo": [
-          {
-            "id": "a424536a-db37-4795-854d-e5c604524558",
-            "position": "887.5,408.5"
-          }
-        ],
-        "editorObjects": []
-      }
     }
   ],
   "meta": {
@@ -317,6 +311,10 @@
       {
         "id": "d010b267-1ac8-459d-aa56-64d3a4ba9073",
         "position": "2349.75,386.4"
+      },
+      {
+        "id": "07e6944e-0515-453f-81ac-7f6e5cdb2e6c",
+        "position": "912.5,408.5"
       },
       {
         "id": "f779ea46-302e-4600-b020-b60781296bc2",

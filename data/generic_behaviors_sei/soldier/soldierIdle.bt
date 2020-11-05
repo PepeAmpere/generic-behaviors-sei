@@ -1,121 +1,210 @@
 {
-  "name": "check in periods",
-  "id": "d82f169f-f98a-4399-b449-16489aa708f0",
-  "type": "supervisedParallel",
+  "name": "move and observe",
+  "id": "39440b8e-6008-4088-a969-fa23cae39319",
+  "type": "sequence",
   "subtrees": [
     {
-      "name": "Wait Forever",
-      "id": "060b3047-40e1-4819-bc19-137a6920f8aa",
-      "type": "waitForever"
-    },
-    {
-      "name": "period",
-      "id": "3bc0c8c9-899d-4655-a7cf-44ec7257f9b8",
-      "type": "sequence",
-      "subtrees": [
-        {
-          "name": "Get terrain openness",
-          "id": "b03a8ce0-2a14-443b-8e8d-d034a0ad93c1",
-          "type": "scriptAction",
-          "script": [
-            "local terrainType = EstimateTerrainTypes(self:GetPosition())",
-            "loc.openTerrainProbability = terrainType[TerrainType.Open]"
-          ]
-        },
-        {
-          "name": "2s",
-          "id": "2f2fc2f3-7287-41f3-a93c-4b80ca54f8c8",
-          "type": "wait",
-          "time": [
-            "return 2"
-          ]
-        }
+      "name": "2 secs",
+      "id": "bfca64b0-1b06-40f1-8d1c-4e0355177c8e",
+      "type": "wait",
+      "time": [
+        "return 2"
       ]
     },
     {
-      "name": "Choose stance",
-      "id": "4c7ba959-eb10-4def-af19-2b086c240615",
-      "type": "selector",
+      "name": "Crouched",
+      "id": "05edadf5-ef29-4dcb-a772-32af6530fab8",
+      "type": "setStance",
+      "stance": [
+        "return Stance.Crouched"
+      ]
+    },
+    {
+      "name": "Wait forever",
+      "id": "bcf35693-18e7-450f-ada2-ea99c77289a1",
+      "type": "waitForever"
+    }
+  ],
+  "unlinked-trees": [
+    {
+      "name": "check in periods",
+      "id": "d82f169f-f98a-4399-b449-16489aa708f0",
+      "type": "supervisedParallel",
       "subtrees": [
         {
-          "name": "wait & prone",
-          "id": "bd0d73f2-949b-49ef-a31c-9244c4a5a532",
+          "name": "Wait Forever",
+          "id": "060b3047-40e1-4819-bc19-137a6920f8aa",
+          "type": "waitForever"
+        },
+        {
+          "name": "period",
+          "id": "3bc0c8c9-899d-4655-a7cf-44ec7257f9b8",
           "type": "sequence",
           "subtrees": [
             {
-              "name": "0-1.5s",
-              "id": "1cabfdad-e38e-4b4b-be14-989c5dda6525",
+              "name": "Get terrain openness",
+              "id": "b03a8ce0-2a14-443b-8e8d-d034a0ad93c1",
+              "type": "scriptAction",
+              "script": [
+                "local terrainType = EstimateTerrainTypes(self:GetPosition())",
+                "loc.openTerrainProbability = terrainType[TerrainType.Open]"
+              ]
+            },
+            {
+              "name": "2s",
+              "id": "2f2fc2f3-7287-41f3-a93c-4b80ca54f8c8",
               "type": "wait",
               "time": [
-                "return math.random()*1.5"
-              ]
-            },
-            {
-              "name": "Prone",
-              "id": "2b14c54a-19a8-42a3-9c74-9d45a76e4982",
-              "type": "setStance",
-              "stance": [
-                "return Stance.Prone"
-              ]
-            },
-            {
-              "name": "Ended by upper behavior",
-              "id": "c287f316-10e6-456c-8c38-b15f4ab3df5b",
-              "type": "waitForever"
-            }
-          ],
-          "decorators": [
-            {
-              "id": "5c7b299a-9a92-4b33-a26d-13c56d130586",
-              "type": "scriptCondition",
-              "name": "If it's open terrain + UnderFire",
-              "script": [
-                "if loc.underFireData ~= nil and loc.underFireData.eventsValues ~= nil then",
-                "    local underFireOpenTerrain = loc.openTerrainProbability > 0.8 and ",
-                "                                 loc.underFireData.eventsValues.projectilesInMinute > 10",
-                "    local underFireClosedTerrain = loc.openTerrainProbability < 0.5 and",
-                "                                   loc.underFireData.eventsValues.projectilesInMinute > 20",
-                "    return underFireOpenTerrain or underFireClosedTerrain",
-                "end",
-                "return false",
-                "       "
+                "return 2"
               ]
             }
           ]
         },
         {
-          "name": "wait & crouch",
-          "id": "6def6aed-0c64-48e9-a9e0-9ad445d9de24",
-          "type": "sequence",
+          "name": "Choose stance",
+          "id": "4c7ba959-eb10-4def-af19-2b086c240615",
+          "type": "selector",
           "subtrees": [
             {
-              "name": "0-1.5s",
-              "id": "b7cfb551-5efc-450e-8110-20f620a9833c",
-              "type": "wait",
-              "time": [
-                "return math.random()*1.5"
+              "name": "wait & prone",
+              "id": "bd0d73f2-949b-49ef-a31c-9244c4a5a532",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "0-1.5s",
+                  "id": "1cabfdad-e38e-4b4b-be14-989c5dda6525",
+                  "type": "wait",
+                  "time": [
+                    "return math.random()*1.5"
+                  ]
+                },
+                {
+                  "name": "Prone",
+                  "id": "2b14c54a-19a8-42a3-9c74-9d45a76e4982",
+                  "type": "setStance",
+                  "stance": [
+                    "return Stance.Prone"
+                  ]
+                },
+                {
+                  "name": "Ended by upper behavior",
+                  "id": "c287f316-10e6-456c-8c38-b15f4ab3df5b",
+                  "type": "waitForever"
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "5c7b299a-9a92-4b33-a26d-13c56d130586",
+                  "type": "scriptCondition",
+                  "name": "If it's open terrain + UnderFire",
+                  "script": [
+                    "if loc.underFireData ~= nil and loc.underFireData.eventsValues ~= nil then",
+                    "    local underFireOpenTerrain = loc.openTerrainProbability > 0.8 and ",
+                    "                                 loc.underFireData.eventsValues.projectilesInMinute > 10",
+                    "    local underFireClosedTerrain = loc.openTerrainProbability < 0.5 and",
+                    "                                   loc.underFireData.eventsValues.projectilesInMinute > 20",
+                    "    return underFireOpenTerrain or underFireClosedTerrain",
+                    "end",
+                    "return false",
+                    "       "
+                  ]
+                }
               ]
             },
             {
-              "name": "Crouched",
-              "id": "5b9e3cde-17f2-4a2e-b162-3ef6edfa91fa",
-              "type": "setStance",
-              "stance": [
-                "return Stance.Crouched"
+              "name": "wait & crouch",
+              "id": "6def6aed-0c64-48e9-a9e0-9ad445d9de24",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "0-1.5s",
+                  "id": "b7cfb551-5efc-450e-8110-20f620a9833c",
+                  "type": "wait",
+                  "time": [
+                    "return math.random()*1.5"
+                  ]
+                },
+                {
+                  "name": "Crouched",
+                  "id": "5b9e3cde-17f2-4a2e-b162-3ef6edfa91fa",
+                  "type": "setStance",
+                  "stance": [
+                    "return Stance.Crouched"
+                  ]
+                },
+                {
+                  "name": "Ended by upper behavior",
+                  "id": "5b766ffc-0b6d-4d9f-a6d9-acec85818ed2",
+                  "type": "waitForever"
+                }
               ]
-            },
-            {
-              "name": "Ended by upper behavior",
-              "id": "5b766ffc-0b6d-4d9f-a6d9-acec85818ed2",
-              "type": "waitForever"
             }
-          ]
+          ],
+          "active": true
         }
       ],
-      "active": true
-    }
-  ],
-  "unlinked-trees": [
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "d82f169f-f98a-4399-b449-16489aa708f0",
+            "position": "1562.5,481.641666666667"
+          },
+          {
+            "id": "060b3047-40e1-4819-bc19-137a6920f8aa",
+            "position": "800,594.141666666667"
+          },
+          {
+            "id": "3bc0c8c9-899d-4655-a7cf-44ec7257f9b8",
+            "position": "1162.5,594.141666666667"
+          },
+          {
+            "id": "b03a8ce0-2a14-443b-8e8d-d034a0ad93c1",
+            "position": "900,706.641666666667"
+          },
+          {
+            "id": "2f2fc2f3-7287-41f3-a93c-4b80ca54f8c8",
+            "position": "1337.5,706.641666666667"
+          },
+          {
+            "id": "4c7ba959-eb10-4def-af19-2b086c240615",
+            "position": "1562.5,706.641666666667"
+          },
+          {
+            "id": "bd0d73f2-949b-49ef-a31c-9244c4a5a532",
+            "position": "1300,794.141666666667"
+          },
+          {
+            "id": "1cabfdad-e38e-4b4b-be14-989c5dda6525",
+            "position": "1087.5,919.141666666667"
+          },
+          {
+            "id": "2b14c54a-19a8-42a3-9c74-9d45a76e4982",
+            "position": "1250,919.141666666667"
+          },
+          {
+            "id": "c287f316-10e6-456c-8c38-b15f4ab3df5b",
+            "position": "1412.5,919.141666666667"
+          },
+          {
+            "id": "6def6aed-0c64-48e9-a9e0-9ad445d9de24",
+            "position": "1825,844.141666666667"
+          },
+          {
+            "id": "b7cfb551-5efc-450e-8110-20f620a9833c",
+            "position": "1662.5,919.141666666667"
+          },
+          {
+            "id": "5b9e3cde-17f2-4a2e-b162-3ef6edfa91fa",
+            "position": "1825,919.141666666667"
+          },
+          {
+            "id": "5b766ffc-0b6d-4d9f-a6d9-acec85818ed2",
+            "position": "1987.5,919.141666666667"
+          }
+        ],
+        "editorObjects": []
+      }
+    },
     {
       "name": "Scan heading-left-right-heading",
       "id": "0e2cbbbe-74a1-4b1b-ac65-470d55b80c20",
@@ -124,7 +213,7 @@
         "nodesInfo": [
           {
             "id": "0e2cbbbe-74a1-4b1b-ac65-470d55b80c20",
-            "position": "1537.5,699.355555555556"
+            "position": "1537.5,1031.64166666667"
           }
         ],
         "editorObjects": []
@@ -145,7 +234,7 @@
         "nodesInfo": [
           {
             "id": "e9909301-fd8b-4ef2-94a1-26f97632220e",
-            "position": "1075,374.355555555556"
+            "position": "1075,706.641666666667"
           }
         ],
         "editorObjects": []
@@ -155,65 +244,25 @@
   "meta": {
     "nodesInfo": [
       {
-        "id": "d82f169f-f98a-4399-b449-16489aa708f0",
-        "position": "1562.5,149.355555555556"
+        "id": "39440b8e-6008-4088-a969-fa23cae39319",
+        "position": "1487.5,231.641666666667"
       },
       {
-        "id": "060b3047-40e1-4819-bc19-137a6920f8aa",
-        "position": "800,261.855555555556"
+        "id": "bfca64b0-1b06-40f1-8d1c-4e0355177c8e",
+        "position": "1358,336.641666666667"
       },
       {
-        "id": "3bc0c8c9-899d-4655-a7cf-44ec7257f9b8",
-        "position": "1162.5,261.855555555556"
+        "id": "05edadf5-ef29-4dcb-a772-32af6530fab8",
+        "position": "1537.5,331.641666666667"
       },
       {
-        "id": "b03a8ce0-2a14-443b-8e8d-d034a0ad93c1",
-        "position": "900,374.355555555556"
-      },
-      {
-        "id": "2f2fc2f3-7287-41f3-a93c-4b80ca54f8c8",
-        "position": "1337.5,374.355555555556"
-      },
-      {
-        "id": "4c7ba959-eb10-4def-af19-2b086c240615",
-        "position": "1562.5,374.355555555556"
-      },
-      {
-        "id": "bd0d73f2-949b-49ef-a31c-9244c4a5a532",
-        "position": "1300,461.855555555556"
-      },
-      {
-        "id": "1cabfdad-e38e-4b4b-be14-989c5dda6525",
-        "position": "1087.5,586.855555555556"
-      },
-      {
-        "id": "2b14c54a-19a8-42a3-9c74-9d45a76e4982",
-        "position": "1250,586.855555555556"
-      },
-      {
-        "id": "c287f316-10e6-456c-8c38-b15f4ab3df5b",
-        "position": "1412.5,586.855555555556"
-      },
-      {
-        "id": "6def6aed-0c64-48e9-a9e0-9ad445d9de24",
-        "position": "1825,511.855555555556"
-      },
-      {
-        "id": "b7cfb551-5efc-450e-8110-20f620a9833c",
-        "position": "1662.5,586.855555555556"
-      },
-      {
-        "id": "5b9e3cde-17f2-4a2e-b162-3ef6edfa91fa",
-        "position": "1825,586.855555555556"
-      },
-      {
-        "id": "5b766ffc-0b6d-4d9f-a6d9-acec85818ed2",
-        "position": "1987.5,586.855555555556"
+        "id": "bcf35693-18e7-450f-ada2-ea99c77289a1",
+        "position": "1737.5,344.141666666667"
       }
     ],
     "editorObjects": [],
-    "canvasSize": "3840,3038.85555555556",
-    "gridPadding": "0,11.8555555555556"
+    "canvasSize": "3840,3371.14166666667",
+    "gridPadding": "0,6.64166666666658"
   },
   "parameters": [
     {

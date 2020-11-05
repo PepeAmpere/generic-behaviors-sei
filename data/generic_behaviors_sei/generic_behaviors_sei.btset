@@ -10,6 +10,7 @@
     "soldier\\soldierIdle.bt",
     "soldier\\soldierMount.bt",
     "soldier\\soldierMove.bt",
+    "soldier\\soldierObserve.bt",
     "soldier\\soldierOccupy.bt",
     "soldier\\soldierReaction.bt",
     "team\\teamDefaultOccupy.bt",

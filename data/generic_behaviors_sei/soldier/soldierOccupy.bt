@@ -17,33 +17,42 @@
       }
     },
     {
-      "name": "Observe placehoder",
-      "id": "3c0469d0-92a4-4f41-9417-0ed5a023f9b1",
-      "type": "waitForever"
+      "name": "Observe",
+      "id": "db0ebe2c-8fa2-4623-bc7d-024e89f1f96e",
+      "type": "reference",
+      "target": [
+        "generic_behaviors_sei",
+        "soldierObserve"
+      ],
+      "arguments": {
+        "orderData": "return arg.orderData"
+      }
     }
   ],
   "meta": {
     "nodesInfo": [
       {
         "id": "3187b03f-21a9-456e-a1e8-a44c3afdd55f",
-        "position": "1900,112.5"
+        "position": "1900,120.5"
       },
       {
         "id": "d09dc847-c560-44ef-bc69-c59527a71748",
-        "position": "1737.5,237.5"
+        "position": "1737.5,245.5"
       },
       {
-        "id": "3c0469d0-92a4-4f41-9417-0ed5a023f9b1",
-        "position": "2025,237.5"
+        "id": "db0ebe2c-8fa2-4623-bc7d-024e89f1f96e",
+        "position": "2000,258"
       }
     ],
     "editorObjects": [],
-    "canvasSize": "3840,2400"
+    "canvasSize": "3840,2408",
+    "gridPadding": "0,8"
   },
   "parameters": [
     {
       "name": "orderData",
-      "isOptional": false
+      "isOptional": false,
+      "defaultValue": ""
     }
   ],
   "locals": {}

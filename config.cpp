@@ -68,7 +68,7 @@ class CfgAvailableBehaviors
 {
 	class generic_sei_team_move
 	{
-		icon = "\core\addons\plugins\generic_sei_team_move\data\generic_sei_team_move.paa";
+		icon = "\core\addons\plugins\generic_behaviors_sei\data\generic_sei_team_move.paa";
 		allowRotate = true;
 
 		identity = "generic_team";
