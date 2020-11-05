@@ -3,6 +3,7 @@
   "trees": [
     "soldier\\soldierDismount.bt",
     "soldier\\soldierFight.bt",
+    "soldier\\soldierFireAtWill.bt",
     "soldier\\soldierFollow.bt",
     "soldier\\soldierFollowEntity.bt",
     "soldier\\soldierFollowFormation.bt",

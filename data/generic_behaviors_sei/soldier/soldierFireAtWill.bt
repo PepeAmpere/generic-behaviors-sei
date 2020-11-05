@@ -1,0 +1,686 @@
+{
+  "name": "Wait Forever",
+  "id": "9e4eb20d-e6e6-401c-af38-042e24f2f7ce",
+  "type": "waitForever",
+  "unlinked-trees": [
+    {
+      "name": "init and run",
+      "id": "dd4be95f-8d74-4e2b-a910-0cc2a29af429",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "Set Visibility",
+          "id": "5bca1f8c-e09f-44c9-8d83-69702ce9a55a",
+          "type": "reference",
+          "target": [
+            "generic_soldier",
+            "setVisibility"
+          ],
+          "arguments": {
+            "orderData": "return arg.orderData"
+          }
+        },
+        {
+          "name": "fireAtWill and debug",
+          "id": "da2b4f2a-f08d-43e6-b914-cb71f12cf928",
+          "type": "supervisedParallel",
+          "subtrees": [
+            {
+              "name": "fireAtWill",
+              "id": "e7b0546f-2983-40c6-8e61-3e59a2f6f8d2",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "Select weapon and mags",
+                  "id": "f68f78fe-f968-4bc7-b64f-ebc07dca621c",
+                  "type": "sequence",
+                  "subtrees": [
+                    {
+                      "name": "get weapons and mags",
+                      "id": "0a31eb97-51b2-4803-8afa-32364382bcb8",
+                      "type": "scriptAction",
+                      "script": [
+                        "-- fills loc.weapons with weapons that have ammo",
+                        "local allWeapons = self:GetWeapons()",
+                        "",
+                        "for _, weapon in pairs(allWeapons) do",
+                        "    local fullMags = {}",
+                        "    for _, magazine in pairs(self:GetWeaponMagazines(weapon)) do",
+                        "        if (magazine.rounds ~= 0) then",
+                        "            fullMags[#fullMags + 1] = magazine",
+                        "        end",
+                        "    end",
+                        "    if (#fullMags ~= 0) then",
+                        "        loc.weapons[weapon] = fullMags",
+                        "    end",
+                        "end"
+                      ]
+                    },
+                    {
+                      "name": "Succeed",
+                      "id": "d8696abb-1c7a-4330-b111-ed3f360228e2",
+                      "type": "success",
+                      "decorators": [
+                        {
+                          "id": "c56cb6a1-3d04-4583-b5fe-64960fd8e741",
+                          "type": "scriptCondition",
+                          "name": "Have any weapons?",
+                          "script": [
+                            "return #loc.weapons > 0"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "get at capability",
+                      "id": "fca632eb-783c-49ad-92fe-0234583804f6",
+                      "type": "scriptAction",
+                      "script": [
+                        "loc.ATCapable = sensor.Evaluate(arg.orderData.sensors.CapabilityOfAntiArmorDirect) or ",
+                        "sensor.Evaluate(arg.orderData.sensors.CapabilityOfAntiArmorIndirect) or ",
+                        "sensor.Evaluate(arg.orderData.sensors.CapabilityOfAntiVehicleDirect)"
+                      ]
+                    },
+                    {
+                      "name": "set/get target",
+                      "id": "599d4ce8-62f5-4567-8657-2c95ffad8d2c",
+                      "type": "scriptAction",
+                      "script": [
+                        "loc.target = arg.orderData.target",
+                        "loc.targetFallbackPosition = arg.orderData.targetFallbackPosition",
+                        "if (loc.target == nil) then",
+                        "    if (loc.ATCapable == true) then",
+                        "        loc.target = sensor.Evaluate(arg.orderData.sensors.TargetAT)",
+                        "    else",
+                        "        loc.target = sensor.Evaluate(arg.orderData.sensors.Target) ",
+                        "    end",
+                        "end"
+                      ]
+                    },
+                    {
+                      "name": "select weapon",
+                      "id": "be47898d-49f0-441f-9b3a-ee1160467bf1",
+                      "type": "scriptAction",
+                      "script": [
+                        "if (loc.target ~= nil and loc.target:GetType() == EntityType.Vehicle and loc.ATCapable == true) then",
+                        "    loc.currentWeapon = soldier.SelectWeapon(loc.weapons, loc.target, false)",
+                        "else",
+                        "    loc.currentWeapon = vbsCon.weapons.GetPrimary() -- XXX",
+                        "        or vbsCon.weapons.GetSecondary() -- XXX",
+                        "end"
+                      ]
+                    },
+                    {
+                      "name": "select magazine",
+                      "id": "2334b607-e8de-4233-9e89-8af1d4b754d9",
+                      "type": "scriptAction",
+                      "decorators": [
+                        {
+                          "id": "3f506fce-8925-4a7b-96cf-b7eee955c33b",
+                          "type": "scriptCondition",
+                          "name": "Weapon selected?",
+                          "script": [
+                            "return loc.currentWeapon ~= nil"
+                          ]
+                        }
+                      ],
+                      "script": [
+                        "if (loc.target ~= nil and loc.target:GetType() == EntityType.Vehicle and loc.ATCapable == true) then",
+                        "    loc.currentMagazine = soldier.SelectAmmo(loc.weapons, loc.currentWeapon, loc.currentMagazine, loc.target)",
+                        "else ",
+                        "    if (loc.currentMagazine == nil) then",
+                        "        loc.currentMagazine = self:GetCurrentMagazine()",
+                        "    end",
+                        "end"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Prepare to fire",
+                  "id": "ce0f6767-b0cd-42ab-939e-785896c1dbc1",
+                  "type": "sequence",
+                  "subtrees": [
+                    {
+                      "name": "loc.currentWeapon",
+                      "id": "23ae34be-bd4a-4cff-830e-50d658cb0f0f",
+                      "type": "selectWeapon",
+                      "decorators": [
+                        {
+                          "id": "256a371f-25e9-4641-bbf6-68c3fb43afc2",
+                          "type": "succeeder",
+                          "name": "Always Succeed"
+                        },
+                        {
+                          "id": "47602385-ec36-4e5a-ba2f-3aa6bfe11714",
+                          "type": "scriptCondition",
+                          "name": "needWeaponSwitch",
+                          "script": [
+                            "return loc.currentWeapon ~= self:GetCurrentWeapon()"
+                          ]
+                        }
+                      ],
+                      "weapon": [
+                        "return loc.currentWeapon"
+                      ]
+                    },
+                    {
+                      "name": "loc.currentMagazine",
+                      "id": "32dd8b2e-720a-4730-954f-31078a84215d",
+                      "type": "selectMagazine",
+                      "decorators": [
+                        {
+                          "id": "d0502027-5aaa-4f73-b74b-59025985d2ca",
+                          "type": "succeeder",
+                          "name": "Always Succeed"
+                        },
+                        {
+                          "id": "e74994fb-b109-4c3c-9788-08ec8f59277c",
+                          "type": "scriptCondition",
+                          "name": "needMagazineSwitch",
+                          "script": [
+                            "if (loc.currentMagazine ~= nil) then",
+                            "    return loc.currentMagazine.magazineClassName ~= self:GetCurrentMagazine().magazineClassName",
+                            "else ",
+                            "    return false",
+                            "end"
+                          ]
+                        }
+                      ],
+                      "magazine": [
+                        "return loc.currentMagazine"
+                      ]
+                    },
+                    {
+                      "name": "set/get rounds",
+                      "id": "e18c1c27-6ef3-408f-8d45-4569635e52ef",
+                      "type": "scriptAction",
+                      "script": [
+                        "local roe = arg.orderData.roe",
+                        "local rounds = 1 -- default",
+                        "",
+                        "if (roe ~= nil) then",
+                        "    local weaponClass = \"rifle\" -- hardcoded now",
+                        "    local weaponRoe = roe.weaponType[weaponClass]",
+                        "    ",
+                        "    if (weaponRoe ~= nil) then",
+                        "        local roundsMin = weaponRoe.roundsMin",
+                        "        local roundsMax = weaponRoe.roundsMax",
+                        "        if (roundsMin ~= nil and roundsMax ~= nil) then",
+                        "            rounds = math.random(roundsMin, roundsMax)",
+                        "        end",
+                        "    end",
+                        "end",
+                        "",
+                        "loc.rounds = rounds"
+                      ]
+                    },
+                    {
+                      "name": "get/set safeCone",
+                      "id": "723b8b93-c5e1-446e-a410-886e16db45e9",
+                      "type": "scriptAction",
+                      "script": [
+                        "loc.safeCone = process.Preset(",
+                        "    arg.orderData.safeCone,",
+                        "    localPresets.default.safeCone,",
+                        "    \"safeCone\"",
+                        ")",
+                        "loc.backFlashCone = process.Preset(",
+                        "    arg.orderData.backFlashCone,",
+                        "    localPresets.default.backFlashCone,",
+                        "    \"backFlashCone\"",
+                        ")",
+                        "loc.ATSafeDistance = process.Preset(",
+                        "    arg.orderData.ATSafeDistance,",
+                        "    localPresets.default.ATSafeDistance,",
+                        "    \"ATSafeDistance\"",
+                        ")"
+                      ]
+                    },
+                    {
+                      "name": "Reload",
+                      "id": "ba5c9016-d813-4602-8f2e-1770f620949c",
+                      "type": "reloadWeapon",
+                      "decorators": [
+                        {
+                          "id": "ff32b1f8-6212-4699-9ede-3adc2c00b1bc",
+                          "type": "succeeder",
+                          "name": "Always Succeed"
+                        },
+                        {
+                          "id": "0da1f7a7-d4d2-401a-90d5-d0b45b636513",
+                          "type": "scriptCondition",
+                          "name": "needRelaod",
+                          "script": [
+                            "if (loc.currentMagazine == nil) then",
+                            "    return true",
+                            "else",
+                            "    return loc.currentMagazine.magazineClassName ~= self:GetCurrentMagazine().magazineClassName",
+                            " or self:GetCurrentMagazine().rounds == 0",
+                            "end"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "aim to entity OR pos OR fail",
+                  "id": "08d297b1-307e-4d06-8a98-a64fe01eccfa",
+                  "type": "selector",
+                  "subtrees": [
+                    {
+                      "name": "Aim target",
+                      "id": "bc5c506a-b1df-438f-b295-a0a137656707",
+                      "type": "scriptAction",
+                      "decorators": [
+                        {
+                          "id": "4a480faf-175c-4afe-9bde-2d0fc480bd89",
+                          "type": "scriptCondition",
+                          "name": "target ~= nil",
+                          "script": [
+                            "return loc.target ~= nil"
+                          ]
+                        }
+                      ],
+                      "script": [
+                        "self:ReqHeadingAimAtEntity(loc.target)"
+                      ]
+                    },
+                    {
+                      "name": "aim area",
+                      "id": "8b0703ab-a613-44b8-a2d7-3ad620a22c79",
+                      "type": "scriptAction",
+                      "decorators": [
+                        {
+                          "id": "6d711995-55b6-489c-b8e7-79891cfec8a9",
+                          "type": "scriptCondition",
+                          "name": "fallbackPos~= nil",
+                          "script": [
+                            "return loc.targetFallbackPosition ~= nil"
+                          ]
+                        }
+                      ],
+                      "script": [
+                        "arg.combatSituation = \"fireInArea\" ",
+                        "self:ReqHeadingAimAtPos(loc.targetFallbackPosition + loc.bodyCenterOffset, arg.orderData.roe.combatSituation[arg.combatSituation].aimTolerance)"
+                      ]
+                    },
+                    {
+                      "name": "Fail",
+                      "id": "4043fc01-4854-4cdf-8584-603d9f2db0a2",
+                      "type": "fail"
+                    }
+                  ],
+                  "active": true
+                },
+                {
+                  "name": "Wait or Fire",
+                  "id": "6903b5dc-4377-4d04-a75f-41068e859cc1",
+                  "type": "parallel",
+                  "subtrees": [
+                    {
+                      "name": "wait 2s",
+                      "id": "81882e15-15fa-4f02-a329-8a45e8f95961",
+                      "type": "wait",
+                      "time": [
+                        "return 2"
+                      ]
+                    },
+                    {
+                      "name": "firing sequence",
+                      "id": "56051dbf-632f-494c-b41f-943617d61402",
+                      "type": "sequence",
+                      "subtrees": [
+                        {
+                          "name": "Set dispersion etc.",
+                          "id": "053075fc-9b4d-4452-b945-c5ed67733d3b",
+                          "type": "reference",
+                          "target": [
+                            "generic_soldier",
+                            "firingGameplay"
+                          ],
+                          "arguments": {
+                            "orderData": "return arg.orderData"
+                          }
+                        },
+                        {
+                          "name": "loc.rounds",
+                          "id": "0285d2c2-4d61-4c8b-b9ca-2c65c9beb958",
+                          "type": "fire",
+                          "rounds": [
+                            "return math.min(self:GetCurrentMagazine().rounds, loc.rounds)"
+                          ]
+                        }
+                      ],
+                      "decorators": [
+                        {
+                          "id": "347b8306-bcaa-49ee-b680-3225921bd005",
+                          "type": "waitUntil",
+                          "name": "not friendly in cone",
+                          "condition": [
+                            "if loc.target ~= nil then",
+                            "    return not self:AreFriendliesInCone(loc.target, loc.safeCone.angle, loc.safeCone.distance)",
+                            "else",
+                            "    return not self:AreFriendliesInCone(loc.targetFallbackPosition + Vec3(0,0,1.5), loc.safeCone.angle, loc.safeCone.distance)",
+                            "end"
+                          ]
+                        },
+                        {
+                          "id": "67e58d0b-60bc-459e-a0fe-f65dcaa80ccd",
+                          "type": "waitUntil",
+                          "name": "target or fire in area",
+                          "condition": [
+                            " return arg.combatSituation == \"fireInArea\" or loc.target ~= nil"
+                          ]
+                        },
+                        {
+                          "id": "e5130c9b-609c-4d57-9f38-4ef3b93ab353",
+                          "type": "waitUntil",
+                          "name": "(AT) target far enough",
+                          "condition": [
+                            "if (loc.target ~= nil) then",
+                            "    if (loc.target:GetType() == EntityType.Vehicle and loc.ATCapable == true) then",
+                            "        return self:GetPosition():Distance(loc.target:GetPosition()) > loc.ATSafeDistance.distance",
+                            "    end",
+                            "end",
+                            "return true"
+                          ]
+                        },
+                        {
+                          "id": "01cc31e4-ede6-458a-9b68-a98675544a86",
+                          "type": "waitUntil",
+                          "name": "(AT) not friendly in backflash cone",
+                          "condition": [
+                            "if (loc.target ~= nil) then",
+                            "    if (loc.target:GetType() == EntityType.Vehicle and loc.ATCapable == true) then",
+                            "        return not self:AreFriendliesInCone(self:GetVectorForward(), loc.backFlashCone.angle, -loc.backFlashCone.distance)",
+                            "    end",
+                            "end",
+                            "return true"
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "waitForAll": false
+                },
+                {
+                  "name": "waitAfterFire seconds",
+                  "id": "23266d26-502b-40ab-a738-88d379c4ebc1",
+                  "type": "wait",
+                  "time": [
+                    "return process.Preset(",
+                    "    arg.orderData.roe.combatSituation[arg.combatSituation].waitAfterFire,",
+                    "    localPresets.default.roe.combatSituation[arg.combatSituation].waitAfterFire,",
+                    "    \"waitAfterFire\"",
+                    ")"
+                  ]
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "102c5528-e77b-40be-8503-1d7cff783fc1",
+                  "type": "loopForever",
+                  "name": "dont stop"
+                }
+              ]
+            },
+            {
+              "name": "debug",
+              "id": "08928d8d-2b6f-42b5-8e77-cb30067e72a0",
+              "type": "scriptAction",
+              "script": [
+                "if arg.orderData.debugEnabled then",
+                "    local offset = Vec3(0,0,1)",
+                "    if loc.targetFallbackPosition ~= nil then",
+                "        draw.Line(self:GetPosition()+offset, loc.targetFallbackPosition, 0,0,0.7,1)",
+                "    end",
+                "    if loc.target ~= nil then",
+                "        draw.Line(self:GetPosition()+offset, loc.target:GetPosition()+offset, 0,0.8,0.5,1)",
+                "    end",
+                "end"
+              ]
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "dd4be95f-8d74-4e2b-a910-0cc2a29af429",
+            "position": "2049.5,285.5"
+          },
+          {
+            "id": "61c42612-009c-4d77-8869-e4e3840f2c42",
+            "position": "2724.5,698"
+          },
+          {
+            "id": "5bca1f8c-e09f-44c9-8d83-69702ce9a55a",
+            "position": "1785.5,392.5"
+          },
+          {
+            "id": "da2b4f2a-f08d-43e6-b914-cb71f12cf928",
+            "position": "2049.5,410.5"
+          },
+          {
+            "id": "e7b0546f-2983-40c6-8e61-3e59a2f6f8d2",
+            "position": "2062,710.5"
+          },
+          {
+            "id": "f68f78fe-f968-4bc7-b64f-ebc07dca621c",
+            "position": "786.999999999996,1023"
+          },
+          {
+            "id": "0a31eb97-51b2-4803-8afa-32364382bcb8",
+            "position": "0,1173"
+          },
+          {
+            "id": "d8696abb-1c7a-4330-b111-ed3f360228e2",
+            "position": "225,1123"
+          },
+          {
+            "id": "fca632eb-783c-49ad-92fe-0234583804f6",
+            "position": "412,1173"
+          },
+          {
+            "id": "599d4ce8-62f5-4567-8657-2c95ffad8d2c",
+            "position": "599.5,1173"
+          },
+          {
+            "id": "be47898d-49f0-441f-9b3a-ee1160467bf1",
+            "position": "799.499999999996,1173"
+          },
+          {
+            "id": "2334b607-e8de-4233-9e89-8af1d4b754d9",
+            "position": "999.499999999996,1123"
+          },
+          {
+            "id": "ce0f6767-b0cd-42ab-939e-785896c1dbc1",
+            "position": "1587,1010.5"
+          },
+          {
+            "id": "23ae34be-bd4a-4cff-830e-50d658cb0f0f",
+            "position": "1224.5,1110.5"
+          },
+          {
+            "id": "32dd8b2e-720a-4730-954f-31078a84215d",
+            "position": "1412,1110.5"
+          },
+          {
+            "id": "e18c1c27-6ef3-408f-8d45-4569635e52ef",
+            "position": "1587,1210.5"
+          },
+          {
+            "id": "723b8b93-c5e1-446e-a410-886e16db45e9",
+            "position": "1749.5,1210.5"
+          },
+          {
+            "id": "ba5c9016-d813-4602-8f2e-1770f620949c",
+            "position": "1924.5,1110.5"
+          },
+          {
+            "id": "08d297b1-307e-4d06-8a98-a64fe01eccfa",
+            "position": "2199.5,1010.5"
+          },
+          {
+            "id": "bc5c506a-b1df-438f-b295-a0a137656707",
+            "position": "2162,1135.5"
+          },
+          {
+            "id": "8b0703ab-a613-44b8-a2d7-3ad620a22c79",
+            "position": "2337.5,1135.5"
+          },
+          {
+            "id": "4043fc01-4854-4cdf-8584-603d9f2db0a2",
+            "position": "2525,1198"
+          },
+          {
+            "id": "6903b5dc-4377-4d04-a75f-41068e859cc1",
+            "position": "2825,985.5"
+          },
+          {
+            "id": "81882e15-15fa-4f02-a329-8a45e8f95961",
+            "position": "2787,1123"
+          },
+          {
+            "id": "56051dbf-632f-494c-b41f-943617d61402",
+            "position": "3024.5,1085.5"
+          },
+          {
+            "id": "053075fc-9b4d-4452-b945-c5ed67733d3b",
+            "position": "2887,1360.5"
+          },
+          {
+            "id": "0285d2c2-4d61-4c8b-b9ca-2c65c9beb958",
+            "position": "3075,1410.5"
+          },
+          {
+            "id": "23266d26-502b-40ab-a738-88d379c4ebc1",
+            "position": "3350,985.5"
+          },
+          {
+            "id": "08928d8d-2b6f-42b5-8e77-cb30067e72a0",
+            "position": "2274.5,523"
+          }
+        ],
+        "editorObjects": [
+          {
+            "id": "61c42612-009c-4d77-8869-e4e3840f2c42",
+            "type": "comment",
+            "header": "TEMP not conceptual",
+            "body": "... but good looking",
+            "bodyAlignment": "Left",
+            "headerBackground": "#FF00FF00",
+            "headerForeground": "#FF000000",
+            "boxBackground": "#FF90EE90",
+            "boxForeground": "#FF000000"
+          }
+        ]
+      }
+    },
+    {
+      "name": "debug backflash cone",
+      "id": "d40d37b9-a496-4e7b-8193-15b95dfe661c",
+      "type": "scriptAction",
+      "decorators": [
+        {
+          "id": "76a35a7f-1bdb-4785-850f-5412a9ba200a",
+          "type": "loopForever",
+          "name": "debug"
+        }
+      ],
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "d40d37b9-a496-4e7b-8193-15b95dfe661c",
+            "position": "3337.5,1123"
+          }
+        ],
+        "editorObjects": []
+      },
+      "script": [
+        "if (loc.target ~= nil) then",
+        "    if (loc.target:GetType() == EntityType.Vehicle and loc.ATCapable == true) then",
+        "        local OFFSET = Vec3(0,0,0.8)",
+        "        draw.Line(self:GetPosition() + OFFSET, self:GetPosition() + OFFSET - loc.backFlashCone.distance * self:GetVectorForward():RotatedAroundZ(loc.backFlashCone.angle),1,0,0,1)",
+        "        draw.Line(self:GetPosition() + OFFSET, self:GetPosition() + OFFSET - loc.backFlashCone.distance * self:GetVectorForward():RotatedAroundZ(-loc.backFlashCone.angle),1,0,0,1)",
+        "",
+        "        local backwardsUnitVector = -(loc.target:GetPosition() - self:GetPosition()):NormalizedXY()",
+        "        draw.Line(self:GetPosition() + 2*OFFSET, self:GetPosition() + 2*OFFSET +backwardsUnitVector, 0,0,1,1)",
+        "        draw.Line(self:GetPosition() + 2*OFFSET, self:GetPosition() + OFFSET + loc.backFlashCone.distance * backwardsUnitVector:RotatedAroundZ(loc.backFlashCone.angle),1,0.5,0,1)",
+        "        draw.Line(self:GetPosition() + 2*OFFSET, self:GetPosition() + OFFSET + loc.backFlashCone.distance * backwardsUnitVector:RotatedAroundZ(-loc.backFlashCone.angle),1,0.5,0,1)",
+        "    end",
+        "end",
+        "return true"
+      ]
+    },
+    {
+      "name": "FAIL if shooting on position once",
+      "id": "1e3a4d7b-63ef-4344-8604-2791335aebc0",
+      "type": "scriptAction",
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "1e3a4d7b-63ef-4344-8604-2791335aebc0",
+            "position": "2837,735.5"
+          }
+        ],
+        "editorObjects": []
+      },
+      "script": [
+        "return loc.targetFallbackPosition == nil"
+      ]
+    },
+    {
+      "name": "Debug loaded ammo",
+      "id": "079780cd-d191-465e-9443-c41fa493e519",
+      "type": "scriptAction",
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "079780cd-d191-465e-9443-c41fa493e519",
+            "position": "2749.5,1223"
+          }
+        ],
+        "editorObjects": []
+      },
+      "script": [
+        "if (loc.ATCapable == true) then",
+        "    DebugLog(self:GetCurrentMagazine().magazineClassName)",
+        "end"
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "9e4eb20d-e6e6-401c-af38-042e24f2f7ce",
+        "position": "2082,205"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3863,3080",
+    "gridPadding": "10.4999999999982,5"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "target": "return nil",
+    "targetFallbackPosition": "return nil",
+    "rounds": "return nil",
+    "safeCone": "return nil",
+    "bodyCenterOffset": "return Vec3(0,0,1)",
+    "weapons": "return {}",
+    "ATCapable": "return false",
+    "currentWeapon": "return self:GetCurrentWeapon()",
+    "currentMagazine": "return self:GetCurrentMagazine()",
+    "backFlashCone": "return nil",
+    "ATSafeDistance": "return nil"
+  }
+}
