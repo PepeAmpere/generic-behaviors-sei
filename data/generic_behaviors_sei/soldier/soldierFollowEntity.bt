@@ -318,6 +318,8 @@
                 "        loc.crouchWhileNotMoving = false",
                 "    end",
                 "    loc.lastPosition = newPosition",
+                "else",
+                "    loc.crouchWhileNotMoving = false",
                 "end"
               ]
             }

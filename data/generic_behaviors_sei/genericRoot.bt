@@ -10,8 +10,8 @@
       "script": [
         "bb.rules = {",
         "    roe = 0,",
-        "    reactionDistanceTrigger = 50, -- meters",
-        "    reactionDistancePursue = 75, -- meters",
+        "    reactionDistanceTrigger = 180, -- meters",
+        "    reactionDistancePursue = 205, -- meters",
         "}"
       ]
     },

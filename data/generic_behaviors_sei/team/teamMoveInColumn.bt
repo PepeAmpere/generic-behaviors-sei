@@ -4,94 +4,117 @@
   "type": "supervisedParallel",
   "subtrees": [
     {
-      "name": "move to position in column",
-      "id": "542e3adc-ef03-430c-8d23-f3a41615d03d",
-      "type": "sequence",
+      "name": "reset or order",
+      "id": "af46f604-e78f-42cc-b20d-d4b832c45576",
+      "type": "selector",
       "subtrees": [
         {
-          "name": "MSG: NewOrder to soldiers",
-          "id": "f10e0f9a-800d-4e92-81c9-f0194579fc06",
-          "type": "scriptAction",
-          "script": [
-            "loc.childElementsInPositions = InternalTable()",
-            "local listOfChildElements = orbat.GetChildElements()",
-            "local pointman = listOfChildElements[1]",
-            "",
-            "-- local newOrder = team.Reorder(listOfChildElements, pointman)",
-            "",
-            "message.SendOrder(",
-            "    pointman, -- receiver",
-            "    arg.orderData.childElementBtset, -- btset",
-            "    \"occupy\", -- behaviorName",
-            "    { -- behaviorParameters",
-            "        -- mandatory",
-            "        position = arg.orderData.position,",
-            "        -- optional",
-            "    },",
-            "    arg.orderData -- copy of current level orderData",
-            "    -- presetName (optional)",
-            "    -- overrides",
-            ")",
-            "",
-            "loc.childElementsInPositions[pointman] = false",
-            "",
-            "local previousSoldier = pointman",
-            "for i=1, #listOfChildElements do",
-            "    local soldier = listOfChildElements[i]",
-            "    if soldier ~= pointman then",
-            "        message.SendOrder(",
-            "            soldier, -- receiver",
-            "            arg.orderData.childElementBtset, -- btset",
-            "            \"follow\", -- behaviorName",
-            "            { -- behaviorParameters",
-            "                -- mandatory",
-            "                elementToFollow = listOfChildElements[i-1],",
-            "                followDistance = arg.orderData.columnSpacing,",
-            "                -- optional",
-            "            },",
-            "            arg.orderData -- copy of current level orderData",
-            "            -- presetName (optional)",
-            "            -- overrides",
-            "        )",
-            "        previousSoldier = soldier",
-            "    end",
-            "end",
-            "",
-            "-- last guy in column should be followed by others",
-            "-- sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, listOfChildElements[#listOfChildElements])"
+          "name": "Reset done",
+          "id": "becf294d-1282-4803-8397-e25ceb06ce7c",
+          "type": "wait",
+          "decorators": [
+            {
+              "id": "97113b73-d8f3-4ccc-9e7f-58ddce01bedb",
+              "type": "valueComparison",
+              "name": "restart?",
+              "operator": "equal",
+              "lhs": {
+                "type": "local",
+                "key": "restart"
+              },
+              "rhs": {
+                "type": "boolean",
+                "value": true
+              }
+            }
+          ],
+          "time": [
+            "loc.restart = false",
+            "return 20"
           ]
         },
         {
-          "name": "childElementsInPositions",
-          "id": "987f4ebc-931f-48a6-a82e-276078796eeb",
-          "type": "waitUntil",
-          "condition": [
-            "local inPositionCounter = 0",
-            "local childElementsCounter = 0",
-            "",
-            "for childElement, inPosition in pairs(loc.childElementsInPositions) do",
-            "    if (childElement:Valid() and childElement:IsAlive()) then",
-            "        if (inPosition) then",
-            "            inPositionCounter = inPositionCounter + 1",
-            "        end",
-            "        childElementsCounter = childElementsCounter + 1",
-            "    end",
-            "end",
-            "",
-            "return inPositionCounter == childElementsCounter"
-          ]
-        },
-        {
-          "name": "MSG: OrderCompleted",
-          "id": "1803dac2-f614-4b47-8d5f-296f4b3ec4c3",
-          "type": "scriptAction",
-          "script": [
-            "local receivers = message.MakeListOfReceivers(arg.orderData)",
-            "",
-            "message.ReportOrderCompleted(receivers, arg.orderData)"
+          "name": "move to position in column",
+          "id": "542e3adc-ef03-430c-8d23-f3a41615d03d",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "MSG: NewOrder to soldiers",
+              "id": "f10e0f9a-800d-4e92-81c9-f0194579fc06",
+              "type": "scriptAction",
+              "script": [
+                "loc.childElementsInPositions = InternalTable()",
+                "local listOfChildElements = orbat.GetChildElements()",
+                "local pointman = listOfChildElements[1]",
+                "",
+                "-- local newOrder = team.Reorder(listOfChildElements, pointman)",
+                "",
+                "message.SendOrder(",
+                "    pointman, -- receiver",
+                "    arg.orderData.childElementBtset, -- btset",
+                "    \"occupy\", -- behaviorName",
+                "    { -- behaviorParameters",
+                "        -- mandatory",
+                "        position = arg.orderData.position,",
+                "        -- optional",
+                "    },",
+                "    arg.orderData -- copy of current level orderData",
+                "    -- presetName (optional)",
+                "    -- overrides",
+                ")",
+                "",
+                "loc.childElementsInPositions[pointman] = false",
+                "",
+                "local previousSoldier = pointman",
+                "for i=1, #listOfChildElements do",
+                "    local soldier = listOfChildElements[i]",
+                "    if soldier ~= pointman then",
+                "        message.SendOrder(",
+                "            soldier, -- receiver",
+                "            arg.orderData.childElementBtset, -- btset",
+                "            \"follow\", -- behaviorName",
+                "            { -- behaviorParameters",
+                "                -- mandatory",
+                "                elementToFollow = listOfChildElements[i-1],",
+                "                followDistance = arg.orderData.columnSpacing,",
+                "                -- optional",
+                "            },",
+                "            arg.orderData -- copy of current level orderData",
+                "            -- presetName (optional)",
+                "            -- overrides",
+                "        )",
+                "        previousSoldier = soldier",
+                "    end",
+                "end",
+                "",
+                "loc.childElementsCount = #listOfChildElements",
+                "",
+                "-- last guy in column should be followed by others",
+                "-- sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, listOfChildElements[#listOfChildElements])"
+              ]
+            },
+            {
+              "name": "childElementsInPositions",
+              "id": "80092e53-dcd6-4357-8860-b91d4d0b9c50",
+              "type": "waitUntil",
+              "condition": [
+                "return loc.done"
+              ]
+            },
+            {
+              "name": "MSG: OrderCompleted",
+              "id": "1803dac2-f614-4b47-8d5f-296f4b3ec4c3",
+              "type": "scriptAction",
+              "script": [
+                "local receivers = message.MakeListOfReceivers(arg.orderData)",
+                "",
+                "message.ReportOrderCompleted(receivers, arg.orderData)"
+              ]
+            }
           ]
         }
-      ]
+      ],
+      "active": true
     },
     {
       "name": "OrderCompleted",
@@ -104,21 +127,81 @@
         ")"
       ],
       "subject": "OrderCompleted"
+    },
+    {
+      "name": "check for completed",
+      "id": "f0f7314e-b027-437a-9323-867df143a15f",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "1s",
+          "id": "1528a5fa-90ec-42c2-b86e-b9c1106750f4",
+          "type": "wait",
+          "time": [
+            "return 1"
+          ]
+        },
+        {
+          "name": "Check order completed",
+          "id": "257c912e-cef3-4da0-8591-13c17604be3b",
+          "type": "scriptAction",
+          "script": [
+            "local inPositionCounter = 0",
+            "local childElementsCounter = 0",
+            "",
+            "for childElement, inPosition in pairs(loc.childElementsInPositions) do",
+            "    if (childElement:Valid() and childElement:IsAlive()) then",
+            "        if (inPosition) then",
+            "            inPositionCounter = inPositionCounter + 1",
+            "        end",
+            "        childElementsCounter = childElementsCounter + 1",
+            "    end",
+            "end",
+            "",
+            "-- check if done",
+            "loc.done = inPositionCounter == childElementsCounter"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Check deaths",
+      "id": "8f606be3-11e5-45dc-8749-67850f1a7464",
+      "type": "scriptAction",
+      "script": [
+        "local listOfChildElements = orbat.GetChildElements()",
+        "",
+        "if loc.childElementsCount == #listOfChildElements then",
+        "    return true",
+        "else",
+        "    loc.restart = true",
+        "    loc.childElementsCount = #listOfChildElements",
+        "    return true",
+        "end"
+      ]
     }
   ],
   "meta": {
     "nodesInfo": [
       {
         "id": "a87ab2be-1a7c-476f-ab03-b93dab0b3d00",
-        "position": "1512.5,511"
+        "position": "1512.5,448.5"
       },
       {
         "id": "ab2114f9-cdaa-499f-806c-a4cb7516994b",
-        "position": "1487.5,311"
+        "position": "1487.5,211"
       },
       {
         "id": "02c43832-0392-4cfb-beea-0ac79bebd402",
-        "position": "1487.5,398.5"
+        "position": "1487.5,298.5"
+      },
+      {
+        "id": "af46f604-e78f-42cc-b20d-d4b832c45576",
+        "position": "1512.5,598.5"
+      },
+      {
+        "id": "becf294d-1282-4803-8397-e25ceb06ce7c",
+        "position": "1250,673.5"
       },
       {
         "id": "542e3adc-ef03-430c-8d23-f3a41615d03d",
@@ -129,8 +212,8 @@
         "position": "1262.5,836"
       },
       {
-        "id": "987f4ebc-931f-48a6-a82e-276078796eeb",
-        "position": "1500,836"
+        "id": "80092e53-dcd6-4357-8860-b91d4d0b9c50",
+        "position": "1487.5,836"
       },
       {
         "id": "1803dac2-f614-4b47-8d5f-296f4b3ec4c3",
@@ -138,7 +221,23 @@
       },
       {
         "id": "9f242520-b69b-4fde-a183-e5c9fd1784c4",
-        "position": "1737.5,711"
+        "position": "1712.5,598.5"
+      },
+      {
+        "id": "f0f7314e-b027-437a-9323-867df143a15f",
+        "position": "1912.5,598.5"
+      },
+      {
+        "id": "1528a5fa-90ec-42c2-b86e-b9c1106750f4",
+        "position": "1862.5,673.5"
+      },
+      {
+        "id": "257c912e-cef3-4da0-8591-13c17604be3b",
+        "position": "2025,673.5"
+      },
+      {
+        "id": "8f606be3-11e5-45dc-8749-67850f1a7464",
+        "position": "2232,592.5"
       }
     ],
     "editorObjects": [
@@ -180,6 +279,9 @@
     }
   ],
   "locals": {
-    "childElementsInPositions": "return nil"
+    "childElementsInPositions": "return nil",
+    "childElementsCount": "return nil",
+    "done": "return false",
+    "restart": "return false"
   }
 }
