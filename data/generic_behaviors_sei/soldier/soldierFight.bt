@@ -159,7 +159,7 @@
             "        end",
             "        ",
             "    end",
-            "    loc.tacticalAnalysis.targetToMove = shortestPath:PositionAlongPath(math.min(10,shortestPath:Length()))",
+            "    loc.tacticalAnalysis.targetToMove = shortestPath:PositionAlongPath(math.min(15,shortestPath:Length()))",
             "end",
             "    ",
             "",
@@ -245,7 +245,7 @@
         {
           "id": "4daa9047-4b52-4bb6-8640-b9a1cf8a4394",
           "type": "scriptCondition",
-          "name": "target not dead",
+          "name": "target not visible, but clear spot closer to target",
           "script": [
             "return loc.tacticalAnalysis.targetToMove ~= nil"
           ]
@@ -258,25 +258,150 @@
       "type": "sequence",
       "subtrees": [
         {
-          "name": "suborderData",
-          "id": "8d875e80-8abd-46ec-b41c-01edc1631208",
-          "type": "scriptAction",
-          "script": [
-            "loc.suborderData = tableExt.Extend(",
-            "    {},",
-            "    arg.orderData,",
-            "    {",
-            "        target = loc.tacticalAnalysis.targetToShoot,",
-            "        waitAfterFire = 2",
-            "    }",
-            ")",
-            "    "
-          ]
-        },
-        {
-          "name": "Move towards the enemy",
-          "id": "e2647ed8-ade0-43e8-8a86-191ac98ab28b",
-          "type": "scriptedReference",
+          "name": "<unnamed>",
+          "id": "3fa1cd5d-1eb1-40b5-ac9d-9c745473cc6b",
+          "type": "supervisedParallel",
+          "subtrees": [
+            {
+              "name": "<unnamed>",
+              "id": "1fe4d08d-2bc7-49ed-8449-ee2742204e3a",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "5 secs",
+                  "id": "44000de7-7d52-4fb2-b0fc-2f84d500a112",
+                  "type": "wait",
+                  "time": [
+                    "return 5"
+                  ]
+                },
+                {
+                  "name": "switch fightNow",
+                  "id": "97cbe7c6-fcad-4329-96c3-1ce2855b8ddf",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.fightNow = not loc.fightNow"
+                  ]
+                },
+                {
+                  "name": "3 secs",
+                  "id": "697fd0cb-05b8-40e6-9cec-20b51b8218d1",
+                  "type": "wait",
+                  "time": [
+                    "return 3"
+                  ]
+                },
+                {
+                  "name": "switch fightNow",
+                  "id": "636ece39-823e-46ce-b964-c5169e9fb41d",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.fightNow = not loc.fightNow"
+                  ]
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "8ba0cc08-4ddc-470e-9895-b89fa27d73ba",
+                  "type": "loopForever",
+                  "name": "<unnamed>"
+                }
+              ]
+            },
+            {
+              "name": "fight",
+              "id": "b1b9694e-e803-4923-bdcd-887d3a6e4f7e",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "suborderData",
+                  "id": "55419461-53e1-451e-a35d-d979368941a5",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.suborderData = tableExt.Extend(",
+                    "    {},",
+                    "    arg.orderData,",
+                    "    {",
+                    "        target = loc.tacticalAnalysis.targetToShoot,",
+                    "        waitAfterFire = 2,",
+                    "    }",
+                    ")",
+                    "    "
+                  ]
+                },
+                {
+                  "name": "Fire at the enemy",
+                  "id": "e2647ed8-ade0-43e8-8a86-191ac98ab28b",
+                  "type": "scriptedReference",
+                  "target": "return bb.ordersMapping.fire",
+                  "arguments": {
+                    "orderData": "return loc.suborderData"
+                  }
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "96c9c209-2155-4d31-a0c3-b27ede60fa3b",
+                  "type": "succeeder",
+                  "name": "Always Succeed"
+                },
+                {
+                  "id": "72e07179-28f2-468d-bdce-6dc01f7392a8",
+                  "type": "scriptCondition",
+                  "name": "fightNow",
+                  "script": [
+                    "return loc.fightNow"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "fight",
+              "id": "8c9a6c56-44a5-4bc5-af85-111a7465cf0a",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "suborderData",
+                  "id": "96835283-b1f0-46c5-ab8f-ce580dc7b783",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.suborderData = tableExt.Extend(",
+                    "    {},",
+                    "    arg.orderData,",
+                    "    {",
+                    "        position = loc.tacticalAnalysis.targetToShoot:GetPosition()",
+                    "    }",
+                    ")",
+                    "    "
+                  ]
+                },
+                {
+                  "name": "Move towards the enemy",
+                  "id": "38aa8188-f498-4594-abe5-31834d64cbbe",
+                  "type": "scriptedReference",
+                  "target": "return bb.ordersMapping.move",
+                  "arguments": {
+                    "orderData": "return loc.suborderData"
+                  }
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "f05d72b0-116d-4d8d-98ac-9d61f7c2ee42",
+                  "type": "succeeder",
+                  "name": "Always Succeed"
+                },
+                {
+                  "id": "cfc8ca6a-a4b4-40cd-aab3-50868e1c0902",
+                  "type": "scriptCondition",
+                  "name": "move now",
+                  "script": [
+                    "return not loc.fightNow"
+                  ]
+                }
+              ]
+            }
+          ],
           "decorators": [
             {
               "id": "dbcfa861-1e18-47f5-a19b-2e1d06fe3d44",
@@ -286,16 +411,12 @@
             {
               "id": "0a084125-dbf9-4977-9fc9-0efe875d86c2",
               "type": "scriptCondition",
-              "name": "target not dead and can destroy",
+              "name": "target not dead",
               "script": [
                 "return orbat.IsAliveAndValid(loc.tacticalAnalysis.targetToShoot)"
               ]
             }
-          ],
-          "target": "return bb.ordersMapping.fire",
-          "arguments": {
-            "orderData": "return loc.suborderData"
-          }
+          ]
         },
         {
           "name": "invalidate target",
@@ -320,89 +441,129 @@
     "nodesInfo": [
       {
         "id": "743832a1-fd9a-45e1-9853-7b0c7f670a14",
-        "position": "2329,354.25"
+        "position": "2329,416.7"
       },
       {
         "id": "b6493481-1e79-4fd9-968d-7b89c137bf59",
-        "position": "1254,516.75"
+        "position": "1254,579.2"
       },
       {
         "id": "ad36effc-e453-4a30-ad68-b0199a8127db",
-        "position": "516.5,641.75"
+        "position": "516.5,704.2"
       },
       {
         "id": "04f77aea-67ea-4589-8488-deaca295d50b",
-        "position": "704,641.75"
+        "position": "704,704.2"
       },
       {
         "id": "c55f6740-7c54-4abb-aa67-1506b4fc9515",
-        "position": "866.5,641.75"
+        "position": "866.5,704.2"
       },
       {
         "id": "539e612b-1554-4606-afc7-d736d56c50b2",
-        "position": "1029,641.75"
+        "position": "1029,704.2"
       },
       {
         "id": "cec3b195-8037-40bd-8a00-e2fd5110741c",
-        "position": "1204,641.75"
+        "position": "1204,704.2"
       },
       {
         "id": "ea022d10-119a-4860-ad0a-80dd43a55361",
-        "position": "1366.5,641.75"
+        "position": "1366.5,704.2"
       },
       {
         "id": "24f6eea6-960c-42b6-a19d-4880a2b69395",
-        "position": "1529,641.75"
+        "position": "1529,704.2"
       },
       {
         "id": "82ce8efe-d3ff-4ba5-80b3-7cf925204622",
-        "position": "1716.5,629.25"
+        "position": "1716.5,691.7"
       },
       {
         "id": "717fa3ce-a256-4203-a1b1-06b40d916fde",
-        "position": "1898.89285714286,699.928571428572"
+        "position": "2082.39285714286,769.628571428572"
       },
       {
         "id": "c1afe4ea-617f-4e8d-8923-91b4f7fd9cc7",
-        "position": "1716.5,854.25"
+        "position": "1900,923.95"
       },
       {
         "id": "5fd06d8a-a06a-44d5-9aff-a5f36d6ca498",
-        "position": "1875,849"
+        "position": "2058.5,918.7"
       },
       {
         "id": "91c93bb5-a320-432c-bad3-1bf221c1c79d",
-        "position": "2079,854.25",
+        "position": "2262.5,923.95",
         "height": 51.428571428571558
       },
       {
         "id": "e01bce9d-a360-4860-a1e1-47da772a1648",
-        "position": "2241.5,854.25"
+        "position": "2425,923.95"
       },
       {
         "id": "81f43c59-1180-4496-8789-5e96399afa20",
-        "position": "2554,604.25"
+        "position": "2775,798.95"
       },
       {
-        "id": "8d875e80-8abd-46ec-b41c-01edc1631208",
-        "position": "2404,854.25"
+        "id": "3fa1cd5d-1eb1-40b5-ac9d-9c745473cc6b",
+        "position": "2762.5,973.95"
+      },
+      {
+        "id": "1fe4d08d-2bc7-49ed-8449-ee2742204e3a",
+        "position": "2287.5,1136.45"
+      },
+      {
+        "id": "44000de7-7d52-4fb2-b0fc-2f84d500a112",
+        "position": "1962.5,1273.95"
+      },
+      {
+        "id": "97cbe7c6-fcad-4329-96c3-1ce2855b8ddf",
+        "position": "2150,1261.45"
+      },
+      {
+        "id": "697fd0cb-05b8-40e6-9cec-20b51b8218d1",
+        "position": "2325,1261.45"
+      },
+      {
+        "id": "636ece39-823e-46ce-b964-c5169e9fb41d",
+        "position": "2487.5,1248.95"
+      },
+      {
+        "id": "b1b9694e-e803-4923-bdcd-887d3a6e4f7e",
+        "position": "2775,1148.95"
+      },
+      {
+        "id": "55419461-53e1-451e-a35d-d979368941a5",
+        "position": "2600,1323.95"
       },
       {
         "id": "e2647ed8-ade0-43e8-8a86-191ac98ab28b",
-        "position": "2575,774"
+        "position": "2762.5,1323.95"
+      },
+      {
+        "id": "8c9a6c56-44a5-4bc5-af85-111a7465cf0a",
+        "position": "3050,1123.95"
+      },
+      {
+        "id": "96835283-b1f0-46c5-ab8f-ce580dc7b783",
+        "position": "2950,1361.45"
+      },
+      {
+        "id": "38aa8188-f498-4594-abe5-31834d64cbbe",
+        "position": "3112.5,1348.95"
       },
       {
         "id": "bba01d28-6d65-4f98-b0d9-754ffaa89842",
-        "position": "2841.5,841.75"
+        "position": "2987.5,1023.95"
       },
       {
         "id": "72fe6dd7-1f35-4169-8cc7-b5f3efa067dc",
-        "position": "2816.5,541.75"
+        "position": "3212.5,598.95"
       }
     ],
     "editorObjects": [],
-    "canvasSize": "3840,2675",
-    "gridPadding": "0,11.5"
+    "canvasSize": "3840,2737.45",
+    "gridPadding": "0,11.4499999999999"
   },
   "active": true,
   "parameters": [
@@ -415,6 +576,7 @@
   "locals": {
     "tacticalAnalysis": "return  {}",
     "suborderData": "return nil",
-    "combatSituation": "return \"movingOpenTerrain\""
+    "combatSituation": "return \"movingOpenTerrain\"",
+    "fightNow": "return true"
   }
 }
