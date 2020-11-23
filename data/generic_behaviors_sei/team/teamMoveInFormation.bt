@@ -1,243 +1,316 @@
 {
-  "name": "move & listen",
-  "id": "d181b79c-c380-4b19-90e2-960c35b0caec",
-  "type": "supervisedParallel",
+  "name": "pre-condition",
+  "id": "e7e21cd3-459a-459f-8906-a9e7f73288aa",
+  "type": "selector",
   "subtrees": [
     {
-      "name": "move to position in column",
-      "id": "c63c6104-7f9a-43a8-be61-eb7dfd8eb688",
-      "type": "sequence",
-      "subtrees": [
+      "name": "Wait Forever",
+      "id": "82bb09c2-5148-4158-8f99-9816e2a60469",
+      "type": "waitForever",
+      "decorators": [
         {
-          "name": "teamFormation",
-          "id": "ce692c7a-4864-4f6f-922e-2b8642d578db",
-          "type": "setFormation",
-          "formation": [
-            "return arg.orderData.formationName"
-          ]
-        },
-        {
-          "name": "MSG: NewOrder to soldiers",
-          "id": "f158a6d2-87c0-4c0d-97e2-13e84ded757c",
-          "type": "scriptAction",
+          "id": "e9885666-2d29-4eaa-8c9c-0bde1b98f4af",
+          "type": "scriptCondition",
+          "name": "0 units",
           "script": [
-            "loc.childElementsInPositions = InternalTable()",
             "local listOfChildElements = orbat.GetChildElements()",
-            "local pointman = sensor.Evaluate(arg.orderData.sensors.Pointman)",
-            "",
-            "local newOrder = team.Reorder(listOfChildElements, pointman)",
-            "",
-            "message.SendOrder(",
-            "    pointman, -- receiver",
-            "    arg.orderData.childElementBtset, -- btset",
-            "    \"occupy\", -- behaviorName",
-            "    { -- behaviorParameters",
-            "        -- mandatory",
-            "        position = arg.orderData.position,",
-            "        -- optional",
-            "    },",
-            "    arg.orderData -- copy of current level orderData",
-            "    -- presetName (optional)",
-            "    -- overrides",
-            ")",
-            "",
-            "loc.childElementsInPositions[pointman] = false",
-            "",
-            "for i=1, #listOfChildElements do",
-            "    local childElement = listOfChildElements[i]",
-            "    if childElement ~= pointman then",
-            "        message.SendOrder(",
-            "            childElement, -- receiver",
-            "            arg.orderData.childElementBtset, -- btset",
-            "            \"follow\", -- behaviorName",
-            "            { -- behaviorParameters",
-            "                -- mandatory",
-            "                -- optional",
-            "            },",
-            "            arg.orderData -- copy of current level orderData",
-            "            -- presetName (optional)",
-            "            -- overrides",
-            "        )",
-            "    end",
-            "end",
-            "",
-            "-- pointman should be followed by others",
-            "sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, pointman)",
-            "",
-            "loc.debugTable = {",
-            "    listOfChildElements = listOfChildElements,",
-            "    pointman = pointman,",
-            "    position = arg.orderData.position,",
-            "    newOrder = newOrder,",
-            "}"
-          ]
-        },
-        {
-          "name": "childElementsInPositions",
-          "id": "a8eef11d-3003-40d4-ad92-262868c187d6",
-          "type": "waitUntil",
-          "condition": [
-            "local inPositionCounter = 0",
-            "local childElementsCounter = 0",
-            "",
-            "for childElement, inPosition in pairs(loc.childElementsInPositions) do",
-            "    if (childElement:Valid() and childElement:IsAlive()) then",
-            "        if (inPosition) then",
-            "            inPositionCounter = inPositionCounter + 1",
-            "        end",
-            "        childElementsCounter = childElementsCounter + 1",
-            "    end",
-            "end",
-            "",
-            "return inPositionCounter == childElementsCounter"
-          ]
-        },
-        {
-          "name": "MSG: OrderCompleted",
-          "id": "1c073d9e-225c-4389-97c3-37d6834af7f3",
-          "type": "scriptAction",
-          "script": [
-            "local receivers = message.MakeListOfReceivers(arg.orderData)",
-            "",
-            "message.ReportOrderCompleted(receivers, arg.orderData)"
+            "return #listOfChildElements == 0"
           ]
         }
       ]
     },
     {
-      "name": "OrderCompleted",
-      "id": "e5c5d253-8aa9-497a-850c-558252fe25ca",
-      "type": "messageHandler",
-      "handler": [
-        "loc.childElementsInPositions[msg.sender] = message.ValidateOrderCompleted(",
-        "    msg, -- full message table",
-        "    \"occupy\" -- behaviorName used in MSG sender script action",
-        ")"
-      ],
-      "subject": "OrderCompleted"
+      "name": "move & listen",
+      "id": "c35535a5-6724-4c9d-8078-ae039288c3ed",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "reset or order",
+          "id": "e7ad75be-f751-416a-9d95-304bb24fe33c",
+          "type": "selector",
+          "subtrees": [
+            {
+              "name": "Reset done",
+              "id": "c278e813-f4c3-437a-9e9c-b284fb10eb0b",
+              "type": "wait",
+              "decorators": [
+                {
+                  "id": "7cad0ba4-5bee-4d0e-a7c2-0b4f740994dc",
+                  "type": "valueComparison",
+                  "name": "restart?",
+                  "operator": "equal",
+                  "lhs": {
+                    "type": "local",
+                    "key": "restart"
+                  },
+                  "rhs": {
+                    "type": "boolean",
+                    "value": true
+                  }
+                }
+              ],
+              "time": [
+                "loc.restart = false",
+                "return 20"
+              ]
+            },
+            {
+              "name": "move to position in formation",
+              "id": "57f337c0-9b59-4fa8-94b1-8ccb9730b919",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "teamFormation",
+                  "id": "ce692c7a-4864-4f6f-922e-2b8642d578db",
+                  "type": "setFormation",
+                  "formation": [
+                    "return \"SEI Generic Team Wedge Right\" "
+                  ]
+                },
+                {
+                  "name": "MSG: NewOrder to soldiers",
+                  "id": "230fa6dd-8f45-4eb3-9d71-74f33d0b632c",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.childElementsInPositions = InternalTable()",
+                    "local listOfChildElements = orbat.GetChildElements()",
+                    "local pointman = listOfChildElements[1]",
+                    "",
+                    "orbat.Reorder(listOfChildElements, pointman)",
+                    "",
+                    "message.SendOrder(",
+                    "    pointman, -- receiver",
+                    "    arg.orderData.childElementBtset, -- btset",
+                    "    \"occupy\", -- behaviorName",
+                    "    { -- behaviorParameters",
+                    "        -- mandatory",
+                    "        position = arg.orderData.position,",
+                    "        -- optional",
+                    "    },",
+                    "    arg.orderData -- copy of current level orderData",
+                    "    -- presetName (optional)",
+                    "    -- overrides",
+                    ")",
+                    "",
+                    "loc.childElementsInPositions[pointman] = false",
+                    "",
+                    "local previousSoldier = pointman",
+                    "for i=1, #listOfChildElements do",
+                    "    local soldier = listOfChildElements[i]",
+                    "    if soldier ~= pointman then",
+                    "        message.SendOrder(",
+                    "            soldier, -- receiver",
+                    "            arg.orderData.childElementBtset, -- btset",
+                    "            \"follow\", -- behaviorName",
+                    "            { -- behaviorParameters",
+                    "            },",
+                    "            arg.orderData -- copy of current level orderData",
+                    "            -- presetName (optional)",
+                    "            -- overrides",
+                    "        )",
+                    "        previousSoldier = soldier",
+                    "    end",
+                    "end",
+                    "",
+                    "loc.childElementsCount = #listOfChildElements",
+                    "",
+                    "-- last guy in column should be followed by others",
+                    "-- sensor.SetLastValue(arg.orderData.sensors.ElementToFollow, listOfChildElements[#listOfChildElements])"
+                  ]
+                },
+                {
+                  "name": "childElementsInPositions",
+                  "id": "7ece0f6f-5388-4130-8ef2-b9ae4e3b5c54",
+                  "type": "waitUntil",
+                  "condition": [
+                    "return loc.done"
+                  ]
+                },
+                {
+                  "name": "MSG: OrderCompleted",
+                  "id": "ed7063b6-72cd-43c7-bb5a-4a5de7fa8a43",
+                  "type": "scriptAction",
+                  "script": [
+                    "local receivers = message.MakeListOfReceivers(arg.orderData)",
+                    "",
+                    "message.ReportOrderCompleted(receivers, arg.orderData)"
+                  ]
+                }
+              ]
+            }
+          ],
+          "active": true
+        },
+        {
+          "name": "OrderCompleted",
+          "id": "426f7824-1166-4ad6-9966-5724c5ab3a79",
+          "type": "messageHandler",
+          "handler": [
+            "loc.childElementsInPositions[msg.sender] = message.ValidateOrderCompleted(",
+            "    msg, -- full message table",
+            "    \"occupy\" -- behaviorName used in MSG sender script action",
+            ")"
+          ],
+          "subject": "OrderCompleted"
+        },
+        {
+          "name": "check for completed",
+          "id": "c8b6955c-c9b5-459e-9fb3-6afdd091f850",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "1s",
+              "id": "84fc743a-c0de-46f6-91af-e25f8ecf7446",
+              "type": "wait",
+              "time": [
+                "return 1"
+              ]
+            },
+            {
+              "name": "Check order completed",
+              "id": "af23c265-d296-424c-b0b9-6913b2eed525",
+              "type": "scriptAction",
+              "script": [
+                "local inPositionCounter = 0",
+                "local childElementsCounter = 0",
+                "",
+                "for childElement, inPosition in pairs(loc.childElementsInPositions) do",
+                "    if (childElement:Valid() and childElement:IsAlive()) then",
+                "        if (inPosition) then",
+                "            inPositionCounter = inPositionCounter + 1",
+                "        end",
+                "        childElementsCounter = childElementsCounter + 1",
+                "    end",
+                "end",
+                "",
+                "-- check if done",
+                "loc.done = inPositionCounter == childElementsCounter"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Check deaths",
+          "id": "f0ea4fd0-7039-4656-ae81-16ca0fce16dc",
+          "type": "scriptAction",
+          "script": [
+            "local listOfChildElements = orbat.GetChildElements()",
+            "",
+            "if loc.childElementsCount == #listOfChildElements then",
+            "    return true",
+            "else",
+            "    loc.restart = true",
+            "    loc.childElementsCount = #listOfChildElements",
+            "    return true",
+            "end"
+          ]
+        }
+      ]
     }
   ],
   "meta": {
     "nodesInfo": [
       {
-        "id": "d181b79c-c380-4b19-90e2-960c35b0caec",
-        "position": "1693,378.75"
+        "id": "e7e21cd3-459a-459f-8906-a9e7f73288aa",
+        "position": "1664.5,285.035714285714"
       },
       {
-        "id": "a86efe4e-f77c-4a87-8df8-9f44c659a6c1",
-        "position": "1875,573.25"
+        "id": "82bb09c2-5148-4158-8f99-9816e2a60469",
+        "position": "1500,391.75"
       },
       {
-        "id": "e055f566-1ab6-40cb-9d56-5397b75e29bc",
-        "position": "1439,574"
+        "id": "c35535a5-6724-4c9d-8078-ae039288c3ed",
+        "position": "1675,416.75"
       },
       {
-        "id": "89545127-cadc-4772-b55e-b45d773cd7f9",
-        "position": "1662.5,173.25"
+        "id": "d86aaefd-a955-41be-a427-43fe4544fb20",
+        "position": "1133.5,766.75"
       },
       {
-        "id": "bef8c680-f41d-4a02-8a78-25b6d59c1c2c",
-        "position": "1662.5,260.75"
+        "id": "00c88555-0134-469e-afe5-b0d990ba7f54",
+        "position": "1400,766.75"
       },
       {
-        "id": "e45bb5f7-7321-48a1-9804-919c226e4e47",
-        "position": "1901.5,449"
+        "id": "e7ad75be-f751-416a-9d95-304bb24fe33c",
+        "position": "1675,566.75"
       },
       {
-        "id": "c63c6104-7f9a-43a8-be61-eb7dfd8eb688",
-        "position": "1662.5,485.75"
+        "id": "c278e813-f4c3-437a-9e9c-b284fb10eb0b",
+        "position": "1462.5,616.75"
+      },
+      {
+        "id": "57f337c0-9b59-4fa8-94b1-8ccb9730b919",
+        "position": "1650,679.25"
       },
       {
         "id": "ce692c7a-4864-4f6f-922e-2b8642d578db",
-        "position": "1264,611.5"
+        "position": "1175,804.25"
       },
       {
-        "id": "f158a6d2-87c0-4c0d-97e2-13e84ded757c",
-        "position": "1451.5,611.5"
+        "id": "230fa6dd-8f45-4eb3-9d71-74f33d0b632c",
+        "position": "1412.5,804.25"
       },
       {
-        "id": "a8eef11d-3003-40d4-ad92-262868c187d6",
-        "position": "1676.5,611.5"
+        "id": "7ece0f6f-5388-4130-8ef2-b9ae4e3b5c54",
+        "position": "1650,804.25"
       },
       {
-        "id": "1c073d9e-225c-4389-97c3-37d6834af7f3",
-        "position": "1887.5,610.75"
+        "id": "ed7063b6-72cd-43c7-bb5a-4a5de7fa8a43",
+        "position": "1875,804.25"
       },
       {
-        "id": "e5c5d253-8aa9-497a-850c-558252fe25ca",
-        "position": "1912.5,485.75"
+        "id": "426f7824-1166-4ad6-9966-5724c5ab3a79",
+        "position": "1875,566.75"
+      },
+      {
+        "id": "c8b6955c-c9b5-459e-9fb3-6afdd091f850",
+        "position": "2075,566.75"
+      },
+      {
+        "id": "84fc743a-c0de-46f6-91af-e25f8ecf7446",
+        "position": "2025,641.75"
+      },
+      {
+        "id": "af23c265-d296-424c-b0b9-6913b2eed525",
+        "position": "2187.5,641.75"
+      },
+      {
+        "id": "f0ea4fd0-7039-4656-ae81-16ca0fce16dc",
+        "position": "2394.5,560.75"
       }
     ],
     "editorObjects": [
       {
-        "id": "a86efe4e-f77c-4a87-8df8-9f44c659a6c1",
+        "id": "d86aaefd-a955-41be-a427-43fe4544fb20",
         "type": "comment",
-        "header": "Parent group & External",
+        "header": "Unieque compared to MoveInColumn",
         "body": "",
         "bodyAlignment": "Left",
-        "width": 199.0,
-        "height": 102.0,
-        "headerBackground": "#FFB26B00",
+        "width": 238.0,
+        "height": 105.0,
+        "headerBackground": "#FFBA55D3",
         "headerForeground": "#FFFFFFFF",
-        "boxBackground": "#FF99FF00",
+        "boxBackground": "#FFDDA0DD",
         "boxForeground": "#FF000000"
       },
       {
-        "id": "e055f566-1ab6-40cb-9d56-5397b75e29bc",
+        "id": "00c88555-0134-469e-afe5-b0d990ba7f54",
         "type": "comment",
-        "header": "occupy + follow",
+        "header": "Unieque compared to MoveInColumn",
         "body": "",
         "bodyAlignment": "Left",
-        "width": 223.0,
-        "height": 98.0,
-        "headerBackground": "#FFB26B00",
+        "width": 238.0,
+        "height": 105.0,
+        "headerBackground": "#FFBA55D3",
         "headerForeground": "#FFFFFFFF",
-        "boxBackground": "#FF99FF00",
-        "boxForeground": "#FF000000"
-      },
-      {
-        "id": "89545127-cadc-4772-b55e-b45d773cd7f9",
-        "type": "comment",
-        "header": "Pointman exists",
-        "body": "Behavior assumes Pointman sensor returns valid value.",
-        "bodyAlignment": "Left",
-        "headerBackground": "#FFC4AA00",
-        "headerForeground": "#FFFFFFFF",
-        "boxBackground": "#FFFFD700",
-        "boxForeground": "#FF000000",
-        "width": 201.0,
-        "height": 74.0
-      },
-      {
-        "id": "bef8c680-f41d-4a02-8a78-25b6d59c1c2c",
-        "type": "comment",
-        "header": "Reports success",
-        "body": "Behavior is expected to autonomously reports its success to unit requested by order.",
-        "bodyAlignment": "Left",
-        "headerBackground": "#FF658720",
-        "headerForeground": "#FFFFFFFF",
-        "boxBackground": "#FF9ACD32",
-        "boxForeground": "#FF000000",
-        "width": 201.0,
-        "height": 87.0
-      },
-      {
-        "id": "e45bb5f7-7321-48a1-9804-919c226e4e47",
-        "type": "comment",
-        "header": "occupy",
-        "body": "",
-        "bodyAlignment": "Left",
-        "width": 168.0,
-        "height": 102.0,
-        "headerBackground": "#FFB26B00",
-        "headerForeground": "#FFFFFFFF",
-        "boxBackground": "#FF99FF00",
+        "boxBackground": "#FFDDA0DD",
         "boxForeground": "#FF000000"
       }
     ],
-    "canvasSize": "3840,2598.25",
-    "gridPadding": "0,10.75"
+    "canvasSize": "3840,2604.25",
+    "gridPadding": "0,4.25"
   },
+  "active": true,
   "parameters": [
     {
       "name": "orderData",
@@ -247,6 +320,9 @@
   ],
   "locals": {
     "childElementsInPositions": "return InternalTable()",
-    "debugTable": "return nil"
+    "childElementsCount": "return nil",
+    "debugTable": "return nil",
+    "done": "return false",
+    "restart": "return false"
   }
 }

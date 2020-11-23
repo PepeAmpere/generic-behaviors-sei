@@ -171,19 +171,23 @@
           "id": "ae3bad00-7a3d-4f9c-8c6f-2ecdaf163815",
           "type": "scriptAction",
           "script": [
-            "local pointman = self:GetParentGroup():GetEntity(0)",
-            "local newPosition = pointman:GetPosition()",
-            "if loc.lastPosition == nil then ",
+            "local pointman = self:GetParentGroup():GetEntity(0) -- TEMPORARY",
+            "",
+            "if orbat.IsAliveAndValid(pointman) then -- not group",
+            "    local newPosition = pointman:GetPosition()",
+            "    if loc.lastPosition == nil then ",
+            "        loc.lastPosition = newPosition",
+            "    elseif ",
+            "        loc.lastPosition:Distance(newPosition) < 1",
+            "    then",
+            "        loc.crouchWhileNotMoving = true",
+            "    else",
+            "        loc.crouchWhileNotMoving = false",
+            "    end",
             "    loc.lastPosition = newPosition",
-            "elseif (loc.lastPosition:Distance(newPosition) < 1) and",
-            "    self:GetPosition():Distance(newPosition) < 12 and",
-            "    pointman ~= self",
-            "then",
-            "    loc.crouchWhileNotMoving = true",
             "else",
             "    loc.crouchWhileNotMoving = false",
-            "end",
-            "loc.lastPosition = newPosition"
+            "end"
           ]
         }
       ]

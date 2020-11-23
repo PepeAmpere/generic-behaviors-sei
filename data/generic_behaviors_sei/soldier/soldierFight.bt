@@ -268,11 +268,11 @@
               "type": "sequence",
               "subtrees": [
                 {
-                  "name": "5 secs",
+                  "name": "#bb.targets * 3",
                   "id": "44000de7-7d52-4fb2-b0fc-2f84d500a112",
                   "type": "wait",
                   "time": [
-                    "return 5"
+                    "return #bb.targets * 3"
                   ]
                 },
                 {
@@ -330,13 +330,68 @@
                   ]
                 },
                 {
-                  "name": "Fire at the enemy",
-                  "id": "e2647ed8-ade0-43e8-8a86-191ac98ab28b",
-                  "type": "scriptedReference",
-                  "target": "return bb.ordersMapping.fire",
-                  "arguments": {
-                    "orderData": "return loc.suborderData"
-                  }
+                  "name": "try chosen target",
+                  "id": "98d06b5a-ef70-4b96-bcf8-742dd31ec499",
+                  "type": "selector",
+                  "subtrees": [
+                    {
+                      "name": "Fire at the enemy",
+                      "id": "e2647ed8-ade0-43e8-8a86-191ac98ab28b",
+                      "type": "scriptedReference",
+                      "target": "return bb.ordersMapping.fire",
+                      "arguments": {
+                        "orderData": "return loc.suborderData"
+                      }
+                    },
+                    {
+                      "name": "try closest target",
+                      "id": "a6c1007e-ae9c-49d4-8461-340b37bf852e",
+                      "type": "sequence",
+                      "subtrees": [
+                        {
+                          "name": "suborderData",
+                          "id": "75ae5b84-dca6-4226-8549-e01b6105fa97",
+                          "type": "scriptAction",
+                          "script": [
+                            "local targets = bb.targets",
+                            "local closestTargetID = 1",
+                            "local closestTargetDistance = math.huge",
+                            "",
+                            "for i=1, #targets do",
+                            "    local distance = self:GetPosition():Distance(targets[i]:GetPosition())",
+                            "    if ",
+                            "        distance < closestTargetDistance and",
+                            "        self:IsVisible(targets[i])",
+                            "    then",
+                            "        closestTargetID = i",
+                            "        closestTargetDistance = distance",
+                            "    end ",
+                            "end",
+                            "",
+                            "loc.suborderData = tableExt.Extend(",
+                            "    {},",
+                            "    arg.orderData,",
+                            "    {",
+                            "        target = targets[closestTargetID],",
+                            "        waitAfterFire = 2,",
+                            "    }",
+                            ")",
+                            "    "
+                          ]
+                        },
+                        {
+                          "name": "Fire at the enemy",
+                          "id": "25a88a96-6203-43e0-ab13-01f16c5a82cb",
+                          "type": "scriptedReference",
+                          "target": "return bb.ordersMapping.fire",
+                          "arguments": {
+                            "orderData": "return loc.suborderData"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "active": true
                 }
               ],
               "decorators": [
@@ -510,35 +565,51 @@
       },
       {
         "id": "1fe4d08d-2bc7-49ed-8449-ee2742204e3a",
-        "position": "2287.5,1136.45"
+        "position": "2100,1098.95"
       },
       {
         "id": "44000de7-7d52-4fb2-b0fc-2f84d500a112",
-        "position": "1962.5,1273.95"
+        "position": "1775,1236.45"
       },
       {
         "id": "97cbe7c6-fcad-4329-96c3-1ce2855b8ddf",
-        "position": "2150,1261.45"
+        "position": "1962.5,1223.95"
       },
       {
         "id": "697fd0cb-05b8-40e6-9cec-20b51b8218d1",
-        "position": "2325,1261.45"
+        "position": "2137.5,1223.95"
       },
       {
         "id": "636ece39-823e-46ce-b964-c5169e9fb41d",
-        "position": "2487.5,1248.95"
+        "position": "2300,1211.45"
       },
       {
         "id": "b1b9694e-e803-4923-bdcd-887d3a6e4f7e",
-        "position": "2775,1148.95"
+        "position": "2600,1236.45"
       },
       {
         "id": "55419461-53e1-451e-a35d-d979368941a5",
-        "position": "2600,1323.95"
+        "position": "2425,1411.45"
+      },
+      {
+        "id": "98d06b5a-ef70-4b96-bcf8-742dd31ec499",
+        "position": "2600,1411.45"
       },
       {
         "id": "e2647ed8-ade0-43e8-8a86-191ac98ab28b",
-        "position": "2762.5,1323.95"
+        "position": "2562.5,1486.45"
+      },
+      {
+        "id": "a6c1007e-ae9c-49d4-8461-340b37bf852e",
+        "position": "2725,1486.45"
+      },
+      {
+        "id": "75ae5b84-dca6-4226-8549-e01b6105fa97",
+        "position": "2725,1561.45"
+      },
+      {
+        "id": "25a88a96-6203-43e0-ab13-01f16c5a82cb",
+        "position": "2887.5,1573.95"
       },
       {
         "id": "8c9a6c56-44a5-4bc5-af85-111a7465cf0a",
@@ -562,7 +633,7 @@
       }
     ],
     "editorObjects": [],
-    "canvasSize": "3840,2737.45",
+    "canvasSize": "3856.5,2737.45",
     "gridPadding": "0,11.4499999999999"
   },
   "active": true,

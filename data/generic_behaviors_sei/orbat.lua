@@ -66,5 +66,24 @@ return {
             end
             return false
         end,
+
+        -- @description Reorder formation based on available soldiers
+        -- @argument listOfChildElements [array] all alive entities in group from bb.orbat
+        -- @argument pointman [entity] point unit
+        -- @return newOrder [array] of entities
+        ["Reorder"] = function(listOfChildElements, pointman)
+            local newOrder = {
+                [1] = pointman
+            }
+            for i=1, #listOfChildElements do
+                local childElement = listOfChildElements[i]
+                if childElement ~= pointman then
+                    newOrder[#newOrder + 1] = childElement
+                end
+            end
+
+            self:SetChildOrder(newOrder)
+            return newOrder
+        end,
     },
 }

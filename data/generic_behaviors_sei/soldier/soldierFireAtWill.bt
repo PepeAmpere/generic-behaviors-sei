@@ -228,11 +228,23 @@
           "type": "parallel",
           "subtrees": [
             {
-              "name": "wait 2s",
-              "id": "81882e15-15fa-4f02-a329-8a45e8f95961",
-              "type": "wait",
-              "time": [
-                "return 2"
+              "name": "non-firing",
+              "id": "7c6d0b67-62fd-4fe8-ac1f-93b19869ed2c",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "wait 2s",
+                  "id": "81882e15-15fa-4f02-a329-8a45e8f95961",
+                  "type": "wait",
+                  "time": [
+                    "return 2"
+                  ]
+                },
+                {
+                  "name": "Fail",
+                  "id": "768b18f7-5aad-414b-9b53-6de14d360a05",
+                  "type": "fail"
+                }
               ]
             },
             {
@@ -275,7 +287,7 @@
           "id": "23266d26-502b-40ab-a738-88d379c4ebc1",
           "type": "wait",
           "time": [
-            "return 2"
+            "return 0.25"
           ]
         }
       ],
@@ -371,7 +383,7 @@
         "nodesInfo": [
           {
             "id": "1e3a4d7b-63ef-4344-8604-2791335aebc0",
-            "position": "3252,735.5"
+            "position": "3250.5,780"
           }
         ],
         "editorObjects": []
@@ -532,8 +544,16 @@
         "position": "3240,985.5"
       },
       {
+        "id": "7c6d0b67-62fd-4fe8-ac1f-93b19869ed2c",
+        "position": "3200.5,1055"
+      },
+      {
         "id": "81882e15-15fa-4f02-a329-8a45e8f95961",
-        "position": "3202,1123"
+        "position": "3125.5,1117.5"
+      },
+      {
+        "id": "768b18f7-5aad-414b-9b53-6de14d360a05",
+        "position": "3275.5,1117.5"
       },
       {
         "id": "56051dbf-632f-494c-b41f-943617d61402",

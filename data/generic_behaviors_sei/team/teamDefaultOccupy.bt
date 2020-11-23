@@ -24,16 +24,56 @@
           ]
         },
         {
-          "name": "Occupy position",
-          "id": "7a5d6d34-f955-4642-9850-0a9cda593297",
-          "type": "reference",
-          "target": [
-            "generic_behaviors_sei",
-            "teamMoveInColumn"
+          "name": "decide",
+          "id": "efa52e3f-db49-48e0-bbd3-d7b0f9e79ae4",
+          "type": "selector",
+          "subtrees": [
+            {
+              "name": "Move to position",
+              "id": "7a5d6d34-f955-4642-9850-0a9cda593297",
+              "type": "reference",
+              "decorators": [
+                {
+                  "id": "9b6063b1-028f-46fa-a896-53ae4565570c",
+                  "type": "scriptCondition",
+                  "name": "if urban (ONCE)",
+                  "script": [
+                    "local position = arg.orderData.position",
+                    "",
+                    "local terrainType = EstimateTerrainTypes(position)",
+                    "local open = terrainType[TerrainType.Open]",
+                    "local closed = terrainType[TerrainType.Closed]",
+                    "local urban = terrainType[TerrainType.Urban]",
+                    "",
+                    "if urban > 0.5 then",
+                    "    return true",
+                    "end",
+                    "return false"
+                  ]
+                }
+              ],
+              "target": [
+                "generic_behaviors_sei",
+                "teamMoveInColumn"
+              ],
+              "arguments": {
+                "orderData": "return loc.suborderData"
+              }
+            },
+            {
+              "name": "Move to position",
+              "id": "5827d21c-b6ba-4f11-9384-1399e9add5b0",
+              "type": "reference",
+              "target": [
+                "generic_behaviors_sei",
+                "teamMoveInFormation"
+              ],
+              "arguments": {
+                "orderData": "return loc.suborderData"
+              }
+            }
           ],
-          "arguments": {
-            "orderData": "return loc.suborderData"
-          }
+          "active": false
         },
         {
           "name": "MSG: OrderCompleted",
@@ -101,15 +141,15 @@
         "nodesInfo": [
           {
             "id": "fc74f019-1400-404b-92cc-2b3212f46cc2",
-            "position": "1737.5,481.7"
+            "position": "1962.5,706.7"
           },
           {
             "id": "3011112c-98a0-46a6-b759-3318746b0441",
-            "position": "1650,569.2"
+            "position": "1875,794.2"
           },
           {
             "id": "7acc7ddc-5515-424f-b608-ab895ebd268d",
-            "position": "1812.5,569.2"
+            "position": "2037.5,794.2"
           }
         ],
         "editorObjects": []
@@ -124,7 +164,7 @@
       },
       {
         "id": "d5717edf-10d9-489d-b006-0a9f8679a76f",
-        "position": "1637.5,527.771428571429"
+        "position": "1862.5,752.771428571429"
       },
       {
         "id": "e0018388-c98d-44e0-a8b8-8a6b7dd2fe00",
@@ -139,8 +179,16 @@
         "position": "1037.5,956.7"
       },
       {
+        "id": "efa52e3f-db49-48e0-bbd3-d7b0f9e79ae4",
+        "position": "1225,956.7"
+      },
+      {
         "id": "7a5d6d34-f955-4642-9850-0a9cda593297",
-        "position": "1225,919.2"
+        "position": "1087.5,1044.2"
+      },
+      {
+        "id": "5827d21c-b6ba-4f11-9384-1399e9add5b0",
+        "position": "1275,1044.2"
       },
       {
         "id": "28a6d45f-a565-484e-a310-9d7c59498a13",
