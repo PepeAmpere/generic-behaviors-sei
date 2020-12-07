@@ -140,7 +140,6 @@
               "id": "e18c1c27-6ef3-408f-8d45-4569635e52ef",
               "type": "scriptAction",
               "script": [
-                "local roe = arg.orderData.roe",
                 "local rounds = 3 -- default",
                 "",
                 "loc.rounds = math.random(rounds)"
