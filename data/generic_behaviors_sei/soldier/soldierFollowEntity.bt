@@ -65,11 +65,12 @@
                   "stance": [
                     "local stance = arg.orderData.stance",
                     "",
-                    "if stance ~= nil then",
-                    "    return stance",
+                    "if stance == nil then",
+                    "    stance = Stance.Standing",
                     "end",
                     "",
-                    "return Stance.Standing"
+                    "loc.stance = stance",
+                    "return stance"
                   ]
                 },
                 {
@@ -200,6 +201,18 @@
                           "name": "PLACEHOLDER: Update speed",
                           "id": "4cb0766d-b1e1-4039-9484-915dc72370c1",
                           "type": "success"
+                        },
+                        {
+                          "name": "Set stance",
+                          "id": "ec69ae02-8acc-4b2d-9028-a9c91569242d",
+                          "type": "reference",
+                          "target": [
+                            "generic_behaviors_sei",
+                            "soldierMovingStance"
+                          ],
+                          "arguments": {
+                            "defaultStance": "loc.stance"
+                          }
                         }
                       ],
                       "decorators": [
@@ -447,6 +460,10 @@
         "position": "2100,1458.35396825397"
       },
       {
+        "id": "ec69ae02-8acc-4b2d-9028-a9c91569242d",
+        "position": "2362.5,1458.35396825397"
+      },
+      {
         "id": "9be79c4a-401f-4663-9227-d6d8fe315e07",
         "position": "2875,1108.35396825397"
       },
@@ -509,6 +526,7 @@
     "entityToFollow": "return nil",
     "suborderData": "return nil",
     "lastPosition": "return nil",
-    "crouchWhileNotMoving": "return false"
+    "crouchWhileNotMoving": "return false",
+    "stance": "return nil"
   }
 }

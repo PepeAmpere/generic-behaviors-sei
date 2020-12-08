@@ -98,6 +98,25 @@
           "subject": "NewRule"
         },
         {
+          "name": "UAVTargets",
+          "id": "35ec641a-e74e-4143-a529-6b75780ad1d4",
+          "type": "messageHandler",
+          "subject": "RegisterTargets",
+          "handler": [
+            "local msgValue = msg.value",
+            "",
+            "local targets = msg.value.targets",
+            "",
+            "DebugLog(self .. \" - NEW RULE received: [\" .. ruleName .. \"] = \" .. ruleValue)",
+            "",
+            "if",
+            "    targets ~= nil",
+            "then",
+            "    bb.targets = targets",
+            "end"
+          ]
+        },
+        {
           "name": "reset or order",
           "id": "486e08d2-8c27-4f05-95cd-77ad59cb1c41",
           "type": "selector",
@@ -230,15 +249,19 @@
       },
       {
         "id": "c6378205-e6c0-44b3-a23a-9a03babb7bc1",
-        "position": "1425,542.5"
+        "position": "1237.5,542.5"
       },
       {
         "id": "2574d24f-a996-4545-940c-54f9548845a4",
-        "position": "1637.5,542.5"
+        "position": "1450,542.5"
       },
       {
         "id": "e5bb4211-bd9f-4a12-a131-984df0a064a1",
-        "position": "1862.5,542.5"
+        "position": "1675,542.5"
+      },
+      {
+        "id": "35ec641a-e74e-4143-a529-6b75780ad1d4",
+        "position": "1887.5,542.5"
       },
       {
         "id": "486e08d2-8c27-4f05-95cd-77ad59cb1c41",

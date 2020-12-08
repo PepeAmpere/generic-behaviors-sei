@@ -146,6 +146,7 @@
           "type": "scriptAction",
           "script": [
             "loc.newTargets = self:GetVisibleEnemies(400)",
+            "local targets = bb.targets",
             "",
             "--GetEntitiesInArea(Circle(self:GetPosition(), 400), { hasBrain = true, enemyOf = self })"
           ]

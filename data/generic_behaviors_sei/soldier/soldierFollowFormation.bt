@@ -34,11 +34,12 @@
               "stance": [
                 "local stance = arg.orderData.stance",
                 "",
-                "if stance ~= nil then",
-                "    return stance",
+                "if stance == nil then",
+                "    stance = Stance.Standing",
                 "end",
                 "",
-                "return Stance.Standing"
+                "loc.stance = stance",
+                "return stance"
               ]
             },
             {
@@ -123,6 +124,18 @@
                     }
                   ],
                   "active": false
+                },
+                {
+                  "name": "Set stance",
+                  "id": "cf3603fd-9953-446f-b859-d83bfaa18ddb",
+                  "type": "reference",
+                  "target": [
+                    "generic_behaviors_sei",
+                    "soldierMovingStance"
+                  ],
+                  "arguments": {
+                    "defaultStance": "loc.stance"
+                  }
                 }
               ]
             }
@@ -280,6 +293,10 @@
         "position": "2262.5,943.5"
       },
       {
+        "id": "cf3603fd-9953-446f-b859-d83bfaa18ddb",
+        "position": "2450,831"
+      },
+      {
         "id": "94047f66-c427-4edc-b013-21c19c5f0f5c",
         "position": "2000,531"
       },
@@ -309,6 +326,7 @@
   ],
   "locals": {
     "lastPosition": "return nil",
-    "crouchWhileNotMoving": "return false"
+    "crouchWhileNotMoving": "return false",
+    "stance": "return nil"
   }
 }

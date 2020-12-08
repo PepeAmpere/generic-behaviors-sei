@@ -53,6 +53,9 @@
     <Content Include="soldier\soldierMove.bt">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="soldier\soldierMovingStance.bt">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="soldier\soldierObserve.bt">
       <SubType>Content</SubType>
     </Content>

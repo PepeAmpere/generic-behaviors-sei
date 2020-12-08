@@ -31,7 +31,7 @@
         "    end",
         "end",
         "",
-        "",
+        "loc.stance = stance",
         "return stance"
       ]
     },
@@ -187,6 +187,18 @@
                 "    end",
                 "end"
               ]
+            },
+            {
+              "name": "Set stance",
+              "id": "64661361-d2b3-41be-9705-16c8355818e0",
+              "type": "reference",
+              "target": [
+                "generic_behaviors_sei",
+                "soldierMovingStance"
+              ],
+              "arguments": {
+                "defaultStance": "loc.stance"
+              }
             }
           ]
         },
@@ -361,6 +373,10 @@
         "position": "2150,733.5"
       },
       {
+        "id": "64661361-d2b3-41be-9705-16c8355818e0",
+        "position": "2325,733.5"
+      },
+      {
         "id": "e4188b1e-387c-4a7f-9cc0-45454fd33cce",
         "position": "2160.75,538"
       },
@@ -400,7 +416,7 @@
         "boxForeground": "#FF000000"
       }
     ],
-    "canvasSize": "3840,2521",
+    "canvasSize": "3857.10761904762,2521",
     "gridPadding": "0,8.5"
   },
   "parameters": [
@@ -411,6 +427,7 @@
     }
   ],
   "locals": {
-    "threats": "return nil"
+    "threats": "return nil",
+    "stance": "return nil"
   }
 }

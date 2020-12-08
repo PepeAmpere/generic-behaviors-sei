@@ -1,0 +1,58 @@
+{
+  "name": "Update stance",
+  "id": "7dd955ff-72e2-4885-a055-1c65c020774c",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Set stance",
+      "id": "25d7093e-d902-47cc-abeb-c14f999baf36",
+      "type": "setStance",
+      "stance": [
+        "local terrainType = EstimateTerrainTypes(self:GetPosition())",
+        "",
+        "local open = terrainType[TerrainType.Open]",
+        "",
+        "-- Soldier is in open terrain with higher probability than urban or closed terrain",
+        "if open >= 0.5 then",
+        "    return Stance.Crouched",
+        "else",
+        "    -- If soldier is not in open terrain, use stance selected for movement",
+        "    return arg.defaultStance",
+        "end"
+      ]
+    },
+    {
+      "name": "Wait 2s",
+      "id": "ae23e6a6-ac24-4113-9051-54150950d699",
+      "type": "wait",
+      "time": [
+        "2"
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "7dd955ff-72e2-4885-a055-1c65c020774c",
+        "position": "1748.8,100.6"
+      },
+      {
+        "id": "25d7093e-d902-47cc-abeb-c14f999baf36",
+        "position": "1673.8,250.6"
+      },
+      {
+        "id": "ae23e6a6-ac24-4113-9051-54150950d699",
+        "position": "1848.8,250.6"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2400"
+  },
+  "parameters": [
+    {
+      "name": "defaultStance",
+      "isOptional": false
+    }
+  ],
+  "locals": {}
+}
