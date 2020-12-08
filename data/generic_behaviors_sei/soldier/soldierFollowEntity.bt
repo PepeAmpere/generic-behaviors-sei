@@ -59,18 +59,17 @@
                   ]
                 },
                 {
-                  "name": "(re)set stance",
-                  "id": "82638386-83e4-40b1-897f-3cff29f2973b",
-                  "type": "setStance",
-                  "stance": [
+                  "name": "Get default stance",
+                  "id": "8910e7cf-1ed2-4c08-a54f-ed919c90f7fb",
+                  "type": "scriptAction",
+                  "script": [
                     "local stance = arg.orderData.stance",
                     "",
                     "if stance == nil then",
                     "    stance = Stance.Standing",
                     "end",
                     "",
-                    "loc.stance = stance",
-                    "return stance"
+                    "loc.stance = stance"
                   ]
                 },
                 {
@@ -420,8 +419,8 @@
         "position": "962.5,983.353968253968"
       },
       {
-        "id": "82638386-83e4-40b1-897f-3cff29f2973b",
-        "position": "1137.5,983.353968253968"
+        "id": "8910e7cf-1ed2-4c08-a54f-ed919c90f7fb",
+        "position": "1150,983.353968253968"
       },
       {
         "id": "5ce8b935-c78d-4407-97e9-41206285f897",

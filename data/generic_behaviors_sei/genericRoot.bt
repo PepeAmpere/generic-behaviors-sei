@@ -12,6 +12,7 @@
         "    roe = 0,",
         "    reactionDistanceTrigger = 180, -- meters",
         "    reactionDistancePursue = 205, -- meters",
+        "    usedWeapon = 0,",
         "}"
       ]
     },
