@@ -1,0 +1,205 @@
+{
+  "name": "Process Group Orders",
+  "id": "ee127aaa-84e0-4b5a-8875-4dc751bbfd78",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Grab driver/spotter",
+      "id": "334d1772-44d0-4c36-918e-856798af0152",
+      "type": "scriptAction",
+      "script": [
+        "-- Make sure we have a valid group with at least one entity",
+        "local FirstGunnerFound = false",
+        "",
+        "if (self:GetEntityCount() > 0) then",
+        "",
+        "    -- Get the first group entities vehicle crew position",
+        "    local currPosition = self:GetEntity(0):GetOwnCrewPosition()",
+        "",
+        "    -- Make sure we are in a vehicle and the position is valid",
+        "    if currPosition:Valid() then",
+        "",
+        "        -- We are in a vehicle so get all the available positions",
+        "        local crewPositions = currPosition:GetVehicle():GetCrewPositions()",
+        "",
+        "        -- Loop through all the positions",
+        "        for i, crewPosition in ipairs(crewPositions) do",
+        "",
+        "            -- Find the entity responsible for driving",
+        "            if crewPosition:GetRole() == VehicleRole.Driver then",
+        "                -- Make sure the position has a valid entity",
+        "                if crewPosition:GetOccupant():Valid() then",
+        "                    -- It is so store it for reference",
+        "                    loc.driver = crewPosition:GetOccupant()",
+        "                end",
+        "            end",
+        "            if (crewPosition:GetRole() == VehicleRole.Gunner and not FirstGunnerFound) then",
+        "                -- Make sure the position has a valid entity",
+        "                if crewPosition:GetOccupant():Valid() then",
+        "                    -- It is so store it for reference",
+        "                    loc.spotter = crewPosition:GetOccupant()",
+        "                    loc.gunnerCrewPosition = crewPosition",
+        "                    FirstGunnerFound = true",
+        "                    -- Figure out if this vehicle has a cannon, machine gun etc",
+        "                    loc.allWeapons = crewPosition:GetWeapons();",
+        "                    if #loc.allWeapons > 1 then",
+        "                        loc.hasMultipleWeapons = true",
+        "                    end",
+        "                    for i,w in ipairs(loc.allWeapons) do",
+        "                       if (IsWeaponKindOf(w,\"vbs2_vehicleTankCannon\")) then",
+        "                          loc.hasMainCannon = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiVehicle = true",
+        "                       end",
+        "                       if (IsWeaponKindOf(w,\"vbs2_vehicleMG\")) then",
+        "                          loc.hasMachinegun = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiPersonnel = true",
+        "                       end",
+        "                       if (IsWeaponKindOf(w,\"vbs2_vehicleLauncherMissile\")) then",
+        "                          loc.hasMissiles = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiVehicle = true",
+        "                       end",
+        "                       if (IsWeaponKindOf(w,\"vbs_ffd_av_laser\")) then",
+        "                          loc.hasLaser = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiVehicle = true",
+        "                       end",
+        "                    end",
+        "                end",
+        "            end",
+        "        end",
+        "    end",
+        "end"
+      ]
+    },
+    {
+      "name": "Send orders to driver/spotter",
+      "id": "c81eb9fc-aa3f-4dfe-8dcf-23ab29fec7ad",
+      "type": "scriptAction",
+      "script": [
+        "self:SendMessage(loc.driver, \"NewOrder\", {",
+        "    behaviorName = \"ugvMove\",",
+        "    position = arg.orderData.position",
+        "    })",
+        "",
+        "if (loc.spotter ~= nil) then",
+        "self:SendMessage(loc.spotter, \"NewOrder\", {",
+        "    behaviorName = \"ugvSpot\",",
+        "    parent = self,",
+        "    hasMainCannon = loc.hasMainCannon,",
+        "    hasMachinegun = loc.hasMachinegun,",
+        "    hasMissiles = loc.hasMissiles,",
+        "    hasLaser = loc.hasLaser,",
+        "    isAntiVehicle = loc.isAntiVehicle,",
+        "    isAntiPersonnel = loc.isAntiPersonnel,",
+        "    allWeapons = loc.allWeapons,",
+        "    gunnerCrewPosition = loc.gunnerCrewPosition,",
+        "    hasMultipleWeapons = loc.hasMultipleWeapons})",
+        "end"
+      ]
+    },
+    {
+      "name": "Listen for stuff",
+      "id": "dca209e5-5d1b-4dc0-be18-27e245204220",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "Wait Forever",
+          "id": "3691fd38-a47b-4b57-9d12-d2f2030b1836",
+          "type": "waitForever"
+        },
+        {
+          "name": "Toggle halt",
+          "id": "6a3b73ea-4448-447d-8d66-8a1e54541bd9",
+          "type": "messageHandler",
+          "subject": "Halt",
+          "handler": [
+            "local halt = msg.value.halt",
+            "",
+            "--Tell the driver to halt or go",
+            "self:SendMessage(",
+            "    loc.driver, ",
+            "    \"Halt\", ",
+            "    {",
+            "    halt = halt",
+            "    }",
+            ")"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "ee127aaa-84e0-4b5a-8875-4dc751bbfd78",
+        "position": "1737.5,205"
+      },
+      {
+        "id": "c9d3081a-c655-4344-8c2a-3eb62d76db5d",
+        "position": "1475,180"
+      },
+      {
+        "id": "334d1772-44d0-4c36-918e-856798af0152",
+        "position": "1550,317.5"
+      },
+      {
+        "id": "c81eb9fc-aa3f-4dfe-8dcf-23ab29fec7ad",
+        "position": "1712.5,317.5"
+      },
+      {
+        "id": "dca209e5-5d1b-4dc0-be18-27e245204220",
+        "position": "1950,317.5"
+      },
+      {
+        "id": "3691fd38-a47b-4b57-9d12-d2f2030b1836",
+        "position": "1887.5,442.5"
+      },
+      {
+        "id": "6a3b73ea-4448-447d-8d66-8a1e54541bd9",
+        "position": "2050,442.5",
+        "height": 54.0
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "c9d3081a-c655-4344-8c2a-3eb62d76db5d",
+        "type": "comment",
+        "header": "GroupOrders",
+        "body": "Fires when new WP becomes active",
+        "bodyAlignment": "Left",
+        "width": 189.0,
+        "height": 86.0,
+        "headerBackground": "#FF00FF00",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FF90EE90",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3840,2605",
+    "gridPadding": "0,5"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "driver": "return nil",
+    "spotter": "return nil",
+    "hasMainCannon": "return nil",
+    "allWeapons": "return {}",
+    "gunnerCrewPosition": "return nil",
+    "hasMachinegun": "return nil",
+    "hasMultipleWeapons": "return false",
+    "hasWeapon": "return false",
+    "hasMissiles": "return nil",
+    "isAntiVehicle": "return false",
+    "isAntiPersonnel": "return false",
+    "hasLaser": "return nil"
+  }
+}

@@ -28,7 +28,10 @@
         "        -- HIGH LEVEL AUTONOMOUS",
         "        [\"follow\"] = {\"generic_behaviors_sei\", \"soldierFollow\"}, -- INPUTS: entity",
         "        [\"observe\"] = {\"generic_behaviors_sei\", \"soldierObserve\"},",
-        "        [\"occupy\"] = {\"generic_behaviors_sei\", \"soldierOccupy\"}, --INPUTS: position        ",
+        "        [\"occupy\"] = {\"generic_behaviors_sei\", \"soldierOccupy\"}, --INPUTS: position",
+        "",
+        "        [\"ugvMove\"] = {\"generic_behaviors_sei\", \"ugvDriverMove\"},",
+        "        [\"ugvSpot\"] = {\"generic_behaviors_sei\", \"ugvSpotterAction\"},",
         "                ",
         "        -- LOW LEVEL (without reaction)",
         "        [\"fight\"] = {\"generic_behaviors_sei\", \"soldierFight\"},",
@@ -38,10 +41,12 @@
         "        [\"genericReaction\"] = {\"generic_behaviors_sei\", \"soldierReaction\"}, --INPUTS: target, boundaries",
         "        [\"idle\"] = {\"generic_behaviors_sei\", \"soldierIdle\"},",
         "        [\"move\"] = {\"generic_behaviors_sei\", \"soldierMove\"}, --INPUTS: position",
+        "        [\"switchWeapon\"] = {\"generic_behaviors_sei\", \"soldierSwitchWeapon\"}, -- needs to be tree to enable switching weapons from generic root",
         "    },",
         "    team = {",
         "        -- HIGH LEVEL AUTONOMOUS",
         "        [\"occupy\"] = {\"generic_behaviors_sei\", \"teamDefaultOccupy\"}, --INPUTS: position",
+        "        [\"ugvMove\"] = {\"generic_behaviors_sei\", \"ugvGroupOccupy\"}, --INPUTS: position",
         "        ",
         "        -- LOW LEVEL (without reaction)",
         "        [\"follow\"] = {\"generic_behaviors_sei\", \"teamFollowEntityInColumn\"}, --INPUTS: entity",
@@ -68,16 +73,6 @@
           "type": "waitForever"
         },
         {
-          "name": "NewOrder",
-          "id": "2574d24f-a996-4545-940c-54f9548845a4",
-          "type": "messageHandler",
-          "handler": [
-            "loc.newOrderData = msg.value",
-            "loc.resetOnNewOrder = true"
-          ],
-          "subject": "NewOrder"
-        },
-        {
           "name": "NewRule",
           "id": "e5bb4211-bd9f-4a12-a131-984df0a064a1",
           "type": "messageHandler",
@@ -93,10 +88,25 @@
             "    ruleName ~= nil and",
             "    ruleValue ~= nil",
             "then",
+            "    -- If the request is for switching weapon and receiver is entity, switch it immediately",
+            "    if ruleName == 'usedWeapon' then",
+            "        loc.switchWeapon = bb.rules[ruleName] ~= ruleValue",
+            "    end",
+            "",
             "    bb.rules[ruleName] = ruleValue",
             "end"
           ],
           "subject": "NewRule"
+        },
+        {
+          "name": "NewOrder",
+          "id": "2574d24f-a996-4545-940c-54f9548845a4",
+          "type": "messageHandler",
+          "handler": [
+            "loc.newOrderData = msg.value",
+            "loc.resetOnNewOrder = true"
+          ],
+          "subject": "NewOrder"
         },
         {
           "name": "UAVTargets",
@@ -107,8 +117,6 @@
             "local msgValue = msg.value",
             "",
             "local targets = msg.value.targets",
-            "",
-            "DebugLog(self .. \" - NEW RULE received: [\" .. ruleName .. \"] = \" .. ruleValue)",
             "",
             "if",
             "    targets ~= nil",
@@ -198,6 +206,79 @@
             }
           ],
           "active": true
+        },
+        {
+          "name": "TerrainTypeRequest",
+          "id": "59ac6bf1-491d-4c11-9039-4414c2cd04b0",
+          "type": "messageHandler",
+          "subject": "TerrainTypeRequest",
+          "handler": [
+            "local position = msg.value.position",
+            "local receiver = msg.sender",
+            "",
+            "local terrainType = EstimateTerrainTypes(position)",
+            "",
+            "self:SendMessage(",
+            "    receiver,",
+            "    \"TerrainTypeRequest\",",
+            "    {",
+            "        terrainType = terrainType,",
+            "    }",
+            ")"
+          ]
+        },
+        {
+          "name": "Switch weapon logic",
+          "id": "56efc338-605f-4867-8a00-b855354446f9",
+          "type": "selector",
+          "subtrees": [
+            {
+              "name": "Weapon switching",
+              "id": "a2f9de9f-564c-4e70-91f8-9f1ec35532a8",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "Wait for switch request",
+                  "id": "59afda67-e350-4dec-b60a-fff6d003578f",
+                  "type": "waitUntil",
+                  "condition": [
+                    "return loc.switchWeapon"
+                  ]
+                },
+                {
+                  "name": "Switch weapon",
+                  "id": "562af1b0-523a-462a-bb6e-4be562f7d1d3",
+                  "type": "scriptedReference",
+                  "target": "return bb.ordersMapping.switchWeapon",
+                  "arguments": {}
+                },
+                {
+                  "name": "Clear variable",
+                  "id": "9ba8a62f-886a-4d91-a41e-c9f3b1999bd5",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.switchWeapon = false"
+                  ]
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "eaa91446-388d-4a7f-a498-157f8bda1e2c",
+                  "type": "scriptCondition",
+                  "name": "Is soldier?",
+                  "script": [
+                    "return (not self.GetEntities)"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Wait Forever",
+              "id": "f94df04c-900e-4624-83ed-2b348ef7dd55",
+              "type": "waitForever"
+            }
+          ],
+          "active": false
         }
       ]
     }
@@ -236,6 +317,10 @@
         "position": "2312.5,617.5"
       },
       {
+        "id": "0c29c5c7-0d73-47ef-acd1-7933ada79042",
+        "position": "2662.5,367.166666666667"
+      },
+      {
         "id": "0a348f95-9553-4e01-9031-7ddefc0594ae",
         "position": "1675,405",
         "height": 50.0
@@ -253,11 +338,11 @@
         "position": "1237.5,542.5"
       },
       {
-        "id": "2574d24f-a996-4545-940c-54f9548845a4",
-        "position": "1450,542.5"
+        "id": "e5bb4211-bd9f-4a12-a131-984df0a064a1",
+        "position": "1462.5,542.5"
       },
       {
-        "id": "e5bb4211-bd9f-4a12-a131-984df0a064a1",
+        "id": "2574d24f-a996-4545-940c-54f9548845a4",
         "position": "1675,542.5"
       },
       {
@@ -295,6 +380,34 @@
       {
         "id": "38f063bb-e748-4cd5-a113-4750a2215c25",
         "position": "2337.5,742.5"
+      },
+      {
+        "id": "59ac6bf1-491d-4c11-9039-4414c2cd04b0",
+        "position": "2287.5,542.5"
+      },
+      {
+        "id": "56efc338-605f-4867-8a00-b855354446f9",
+        "position": "2725,555"
+      },
+      {
+        "id": "a2f9de9f-564c-4e70-91f8-9f1ec35532a8",
+        "position": "2637.5,655"
+      },
+      {
+        "id": "59afda67-e350-4dec-b60a-fff6d003578f",
+        "position": "2550,817.5"
+      },
+      {
+        "id": "562af1b0-523a-462a-bb6e-4be562f7d1d3",
+        "position": "2750,817.5"
+      },
+      {
+        "id": "9ba8a62f-886a-4d91-a41e-c9f3b1999bd5",
+        "position": "2925,817.5"
+      },
+      {
+        "id": "f94df04c-900e-4624-83ed-2b348ef7dd55",
+        "position": "2825,655"
       }
     ],
     "editorObjects": [
@@ -323,6 +436,19 @@
         "boxForeground": "#FF000000",
         "width": 191.0,
         "height": 190.0
+      },
+      {
+        "id": "0c29c5c7-0d73-47ef-acd1-7933ada79042",
+        "type": "comment",
+        "header": "Switch weapon logic",
+        "body": "Logic for weapon switching, it has to be in the root so it can be switched instantly in parallel with any correcntly running behavior. First passive check determine at the beginning if the brain is group or soldier. For soldiers than switches weapons after request. Switch has to be done by scripted reference, because otherwise the behavior would be incompatible with group brain bz using \"switch weapon\" node.",
+        "bodyAlignment": "Left",
+        "width": 332.33333333333326,
+        "height": 256.13333333333338,
+        "headerBackground": "#FF00FF00",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FF90EE90",
+        "boxForeground": "#FF000000"
       }
     ],
     "canvasSize": "3840,2730",
@@ -332,6 +458,8 @@
   "locals": {
     "newOrderData": "return nil",
     "resetOnNewOrder": "return false",
-    "ordersMapping": "return nil"
+    "terType": "return nil",
+    "sender": "return nil",
+    "switchWeapon": "return false"
   }
 }

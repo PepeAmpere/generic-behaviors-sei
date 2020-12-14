@@ -1,0 +1,647 @@
+{
+  "name": "Driver move",
+  "id": "4c8cf90b-f5d8-408b-ba2c-f62181c2d54b",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Send driver initialised",
+      "id": "4e3dac0d-582b-47a6-95ac-18cc2c3ffeba",
+      "type": "scriptAction",
+      "script": [
+        "self:SendMessage(arg.actionData.parent, \"DriverInitialised\", {initialised = true})",
+        "--if (bb.isHaltedOnDetect == nil) then",
+        "    --bb.isHaltedOnDetect = false",
+        "--end",
+        "loc.isHaltedOnDetect = false",
+        "if (bb.isFollowing == nil) then",
+        "    bb.isFollowing = false",
+        "end"
+      ]
+    },
+    {
+      "name": "Driver behavior",
+      "id": "88690dd9-b6fb-4c95-996a-72ba09b88592",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "Wait Forever",
+          "id": "2e289c6b-03a4-4e43-9243-5ea6f32cc064",
+          "type": "waitForever"
+        },
+        {
+          "name": "Reset Behavior",
+          "id": "eede39e1-2ba3-4b50-aff6-f00af9d85673",
+          "type": "selector",
+          "subtrees": [
+            {
+              "name": "reset = false",
+              "id": "3012681e-0a61-41c9-ae19-f0213dc4393c",
+              "type": "waitUntil",
+              "decorators": [
+                {
+                  "id": "988f46ab-ce4b-415b-9a15-b236c55a363c",
+                  "type": "scriptCondition",
+                  "name": "reset == true",
+                  "script": [
+                    "return loc.reset"
+                  ]
+                }
+              ],
+              "condition": [
+                "loc.reset = false",
+                "return not loc.reset"
+              ]
+            },
+            {
+              "name": "Follow owner",
+              "id": "4720cba3-96f3-46d6-940f-bbabdeff6772",
+              "type": "sequence",
+              "subtrees": [
+                {
+                  "name": "get owner pos",
+                  "id": "5cbe987e-8361-4732-bb7f-d2530787b3ce",
+                  "type": "scriptAction",
+                  "script": [
+                    "loc.followMePos = bb.owner:GetPosition()"
+                  ]
+                },
+                {
+                  "name": "follow speed",
+                  "id": "fec4c39f-72d0-4508-a5a0-74b858e8eff2",
+                  "type": "setEntitySpeedLimits",
+                  "movementSpeed": [
+                    "--I'd like to somehow get the UGV to adapt its speed depending on the distance it needs to travel.",
+                    "--Two methods below, neither work satisfactory right now so just default to normal speed",
+                    "",
+                    "--loc.futurePath = self:GetPath()",
+                    "--if (self:GetPosition():Distance(loc.owner:GetPosition()) > 15) then",
+                    "    return (30 * 0.278)",
+                    "--else",
+                    "    --return (4 * 0.278)",
+                    "--end",
+                    "",
+                    "--[[local futurePath = self:GetPath()",
+                    "if futurePath:IsReady() then",
+                    "    local thisPath = futurePath:Value()",
+                    "    if path ~= nil then",
+                    "DebugLog(\"path length = \"..toString(thisPath:Length()))",
+                    "        if (thisPath:Length() > 15) then",
+                    "            return (30 * 0.278)",
+                    "        else",
+                    "            return (3 * 0.278)",
+                    "        end",
+                    "    else",
+                    "        return (30 * 0.278)",
+                    "    end",
+                    "else",
+                    "    return (30 * 0.278)",
+                    "end]]--"
+                  ]
+                },
+                {
+                  "name": "Follow owner",
+                  "id": "7f6edea7-9bdd-43b4-bdff-4775d1574bb8",
+                  "type": "supervisedParallel",
+                  "subtrees": [
+                    {
+                      "name": "Move near owner",
+                      "id": "937f9a29-7679-4b79-9ebd-760cd27f5822",
+                      "type": "move",
+                      "position": [
+                        "return loc.followMePos"
+                      ]
+                    },
+                    {
+                      "name": "check for progress",
+                      "id": "89d11d40-c445-4cb5-b86b-4a2c7d0f0db8",
+                      "type": "scriptAction",
+                      "script": [
+                        "if (loc.speedMonitorTimer:CurrentValue() < 1) then",
+                        "    local thisVehicle = self:GetOwnCrewPosition():GetVehicle()",
+                        "    local thisSpeed = thisVehicle:GetSpeed()",
+                        "    if (thisSpeed < 0.05) then",
+                        "        loc.speedMonitor = loc.speedMonitor + 1",
+                        "    else",
+                        "        loc.speedMonitor = 0",
+                        "        loc.vehicleIsBlocked = false",
+                        "    end",
+                        "    if (loc.speedMonitor > 4 and not loc.vehicleIsBlocked) then",
+                        "        --[[self:SendMessage(",
+                        "            arg.actionData.parent,",
+                        "            'progressBlocked',",
+                        "            {",
+                        "            }",
+                        "        )]]--",
+                        "        self:SendMessage(Message.External, \"PROGRESS_BLOCKED\", {",
+                        "        actionName = \"Following\"})",
+                        "        loc.vehicleIsBlocked = true",
+                        "        DebugLog(\"Following blocked\")",
+                        "        DebugLog(tostring(arg.actionData.parent))",
+                        "    end",
+                        "    loc.speedMonitorTimer = loc.speedMonitorTimer:Incremented(1, 1)",
+                        "end"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "0485d914-2aa3-45e2-a6ea-543c40df04ef",
+                  "type": "scriptCondition",
+                  "name": "Is following?",
+                  "script": [
+                    "return bb.isFollowing",
+                    "--return bb.isFollowing"
+                  ]
+                },
+                {
+                  "id": "c7eb7a80-8614-4494-a181-8210acea6bca",
+                  "type": "scriptCondition",
+                  "name": "UGV > 10m away?",
+                  "script": [
+                    "return (self:GetPosition():Distance(bb.owner:GetPosition()) > 10)"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "driver stuff",
+              "id": "40050c0e-73fd-424e-809a-8f1dda428de2",
+              "type": "selector",
+              "subtrees": [
+                {
+                  "name": "Move to WP",
+                  "id": "d4ec862f-23bf-4e60-94af-c8f21b25d536",
+                  "type": "sequence",
+                  "subtrees": [
+                    {
+                      "name": "set speed",
+                      "id": "8f874bd0-7211-40f8-9e95-d22c8ea8109f",
+                      "type": "setEntitySpeedLimits",
+                      "movementSpeed": [
+                        "local thisSpeed = (loc.speed * 0.278)",
+                        "return thisSpeed"
+                      ]
+                    },
+                    {
+                      "name": "set threats",
+                      "id": "ffc6e08d-43df-4648-ab5d-915b0a243aef",
+                      "type": "scriptAction",
+                      "script": [
+                        "local threatsTable = {}",
+                        "if (loc.avoidThreats) then",
+                        "  for i, threat in ipairs(loc.allThreats) do",
+                        "    threatsTable[i] = {",
+                        "      area = Circle(threat.position, threat.size),",
+                        "      avoidance = 10",
+                        "    }",
+                        "  end",
+                        "    DebugLog(\"All threats = \".. tostring(#threatsTable))",
+                        "end",
+                        "self:SetThreats(threatsTable)",
+                        "",
+                        "-- Handy debug to list all the current threats",
+                        "--local threats = self:GetThreats()",
+                        "--DebugLog(\"Threats = \".. tostring(#threats))",
+                        "--[[if threats ~= nil then  ",
+                        "    for i, threat in ipairs(threats) do  ",
+                        "        if threat.area ~= nil then  ",
+                        "            --DebugLog('center: '..threat.area:Center())  ",
+                        "            --DebugLog('radius: '..threat.area:Radius())  ",
+                        "        end  ",
+                        "       -- DebugLog('avoidance: '..threat.avoidance)",
+                        "    end  ",
+                        "end]]--"
+                      ]
+                    },
+                    {
+                      "name": "Move to goal",
+                      "id": "a01e7c6b-e21b-463b-9774-c7d461e86898",
+                      "type": "supervisedParallel",
+                      "subtrees": [
+                        {
+                          "name": "Move To Goal",
+                          "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+                          "type": "move",
+                          "position": [
+                            "return loc.position"
+                          ],
+                          "restrictions": [
+                            "return MovementRestrictions[loc.routeRestrictions]"
+                          ]
+                        },
+                        {
+                          "name": "check for progress",
+                          "id": "436989d9-8c9a-4a13-be00-48f38f2d44e0",
+                          "type": "scriptAction",
+                          "script": [
+                            "if (loc.speedMonitorTimer:CurrentValue() < 1) then",
+                            "    local thisVehicle = self:GetOwnCrewPosition():GetVehicle()",
+                            "    local thisSpeed = thisVehicle:GetSpeed()",
+                            "    if (thisSpeed < 0.05) then",
+                            "        loc.speedMonitor = loc.speedMonitor + 1",
+                            "    else",
+                            "        loc.speedMonitor = 0",
+                            "        loc.vehicleIsBlocked = false",
+                            "    end",
+                            "    if (loc.speedMonitor > 4 and not loc.vehicleIsBlocked) then",
+                            "        self:SendMessage(",
+                            "            arg.actionData.parent,",
+                            "            'progressBlocked',",
+                            "            {",
+                            "            }",
+                            "        )",
+                            "        loc.vehicleIsBlocked = true",
+                            "    end",
+                            "    loc.speedMonitorTimer = loc.speedMonitorTimer:Incremented(1, 1)",
+                            "end"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Send Waypoint Complete",
+                      "id": "632d7ee4-fc23-40f9-ad27-c24fddc5e8bd",
+                      "type": "scriptAction",
+                      "script": [
+                        "loc.position = nil",
+                        "",
+                        "self:SendMessage(",
+                        "    arg.actionData.parent,",
+                        "    'MoveCompleted',",
+                        "    {",
+                        "        moveComplete = true",
+                        "    }",
+                        ")"
+                      ]
+                    }
+                  ],
+                  "decorators": [
+                    {
+                      "id": "1406e950-8e1a-4fdb-aec2-23cdb023ff92",
+                      "type": "scriptCondition",
+                      "name": "isHaltedOnDetect ~= true",
+                      "script": [
+                        "--return not bb.isHaltedOnDetect",
+                        "return not loc.isHaltedOnDetect"
+                      ]
+                    },
+                    {
+                      "id": "853541d1-e489-41db-bb1f-b96a8853d0fc",
+                      "type": "scriptCondition",
+                      "name": "halt ~= true",
+                      "script": [
+                        "return not loc.halt"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Wait Forever",
+                  "id": "11bc650b-0ac7-4db4-9b11-95bd7c07bd91",
+                  "type": "waitForever"
+                }
+              ],
+              "decorators": [
+                {
+                  "id": "585d4e7e-ab15-4368-992c-4534a2ba4f7a",
+                  "type": "waitUntil",
+                  "name": "position ~= nil",
+                  "condition": [
+                    "return (loc.position ~= nil and (loc.position ~= nil and not bb.isFollowing))"
+                  ]
+                }
+              ],
+              "active": true
+            }
+          ],
+          "active": true
+        },
+        {
+          "name": "Threat requester",
+          "id": "9368b5fe-be09-4091-bcee-8d9f235e15de",
+          "type": "scriptAction",
+          "script": [
+            "if (loc.threatTickTime:CurrentValue() < 1) then",
+            "    if (loc.avoidThreats) then",
+            "        self:SendMessage(Message.External, \"ThreatRequest\", {});",
+            "        loc.threatTickTime = loc.threatTickTime:Incremented(1, 10)",
+            "    end",
+            "end"
+          ]
+        },
+        {
+          "name": "New Position Recieved",
+          "id": "33ff1e57-77b8-4399-9c63-afb06f0321f8",
+          "type": "messageHandler",
+          "subject": "NewActionRequest",
+          "handler": [
+            "loc.position = msg.value.position",
+            "loc.routeRestrictions = msg.value.routeRestrictions",
+            "loc.avoidThreats = msg.value.avoidThreats",
+            "loc.speed = msg.value.speed",
+            "loc.reset = true",
+            "loc.waypointDescription = msg.value.waypointDescription"
+          ]
+        },
+        {
+          "name": "Halt",
+          "id": "86b16637-5b3e-47af-a9d2-ed9041c1da90",
+          "type": "messageHandler",
+          "subject": "Halt",
+          "handler": [
+            "loc.halt = msg.value.halt",
+            "local thisIsHaltedOnDetect = msg.value.isHaltedOnDetect",
+            "if (thisIsHaltedOnDetect ~= nil) then",
+            "    --bb.isHaltedOnDetect = thisIsHaltedOnDetect",
+            "    loc.isHaltedOnDetect = thisIsHaltedOnDetect",
+            "end",
+            "loc.reset = true"
+          ]
+        },
+        {
+          "name": "update threats",
+          "id": "04922f79-1929-4940-bae0-19b3cf97b99f",
+          "type": "messageHandler",
+          "subject": "UpdateThreats",
+          "handler": [
+            "loc.allThreats = msg.value.allThreats",
+            "",
+            "local threatsTable = {}",
+            "if (loc.avoidThreats) then",
+            "  for i, threat in ipairs(loc.allThreats) do",
+            "    threatsTable[i] = {",
+            "      area = Circle(threat.position, threat.size),",
+            "      avoidance = 10",
+            "    }",
+            "  end",
+            "end",
+            "self:SetThreats(threatsTable)",
+            "--loc.reset = true",
+            "",
+            "-- Handy debug to list all the current threats",
+            "--[[local threats = self:GetThreats()  ",
+            "if threats ~= nil then  ",
+            "    for i, threat in ipairs(threats) do  ",
+            "        if threat.area ~= nil then  ",
+            "            DebugLog('center: '..threat.area:Center())  ",
+            "            DebugLog('radius: '..threat.area:Radius())  ",
+            "        end  ",
+            "        DebugLog('avoidance: '..threat.avoidance)  ",
+            "    end  ",
+            "end  ]]--"
+          ]
+        },
+        {
+          "name": "Following?",
+          "id": "119206d9-0ca7-4382-a4d2-0fec69974c93",
+          "type": "messageHandler",
+          "subject": "UGVFollowing",
+          "handler": [
+            "bb.isFollowing = msg.value.isFollowing",
+            "bb.owner = msg.value.owner",
+            "--loc.reset = true",
+            "DebugLog(\"isFollowing reveived by driver\")"
+          ]
+        },
+        {
+          "name": "AbortWaypoint",
+          "id": "fbaeca63-e9d6-47fd-88cf-82b61c5c14f0",
+          "type": "messageHandler",
+          "subject": "AbortWaypoint",
+          "handler": [
+            "if (msg.value.abortWaypoint) then",
+            "    loc.position = nil",
+            "end",
+            "loc.reset = true"
+          ]
+        }
+      ]
+    }
+  ],
+  "unlinked-trees": [
+    {
+      "name": "move UGV",
+      "id": "507861af-23f2-4a68-b649-dd88b18845e5",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "<unnamed>",
+          "id": "1974e04d-58e5-434b-822b-d856db836373",
+          "type": "scriptAction",
+          "script": [
+            "loc.futurePath = self:GetPath()"
+          ]
+        },
+        {
+          "name": "set speed for path",
+          "id": "e106e1fe-1461-4af2-a7e3-e296a73eb38a",
+          "type": "setEntitySpeedLimits",
+          "decorators": [
+            {
+              "id": "bfc9d3fa-fa5d-4ae2-b702-fd6f8223a728",
+              "type": "scriptCondition",
+              "name": "wait for path",
+              "script": [
+                "return loc.futurePath:IsReady()"
+              ]
+            }
+          ],
+          "movementSpeed": [
+            "local thisPath = loc.futurePath:Value()",
+            "if path ~= nil then",
+            "DebugLog(\"path length = \"..toString(thisPath:Length()))",
+            "    if (thisPath:Length() > 15) then",
+            "        return (30 * 0.278)",
+            "    else",
+            "        return (3 * 0.278)",
+            "    end",
+            "else",
+            "    return (30 * 0.278)",
+            "end"
+          ]
+        }
+      ],
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "507861af-23f2-4a68-b649-dd88b18845e5",
+            "position": "1425,1029.5"
+          },
+          {
+            "id": "1974e04d-58e5-434b-822b-d856db836373",
+            "position": "1262.5,1104.5"
+          },
+          {
+            "id": "e106e1fe-1461-4af2-a7e3-e296a73eb38a",
+            "position": "1425,1104.5"
+          }
+        ],
+        "editorObjects": []
+      }
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "4c8cf90b-f5d8-408b-ba2c-f62181c2d54b",
+        "position": "1862.5,304.500000000001"
+      },
+      {
+        "id": "a51608d7-c170-4f39-a396-db787b487762",
+        "position": "2037.5,317.000000000001"
+      },
+      {
+        "id": "4e3dac0d-582b-47a6-95ac-18cc2c3ffeba",
+        "position": "1675,404.500000000001"
+      },
+      {
+        "id": "88690dd9-b6fb-4c95-996a-72ba09b88592",
+        "position": "1862.5,404.500000000001"
+      },
+      {
+        "id": "2e289c6b-03a4-4e43-9243-5ea6f32cc064",
+        "position": "1687.5,504.500000000001"
+      },
+      {
+        "id": "eede39e1-2ba3-4b50-aff6-f00af9d85673",
+        "position": "1862.5,504.500000000001"
+      },
+      {
+        "id": "3012681e-0a61-41c9-ae19-f0213dc4393c",
+        "position": "1500,592"
+      },
+      {
+        "id": "4720cba3-96f3-46d6-940f-bbabdeff6772",
+        "position": "1675,592"
+      },
+      {
+        "id": "5cbe987e-8361-4732-bb7f-d2530787b3ce",
+        "position": "1350,842"
+      },
+      {
+        "id": "fec4c39f-72d0-4508-a5a0-74b858e8eff2",
+        "position": "1512.5,842"
+      },
+      {
+        "id": "7f6edea7-9bdd-43b4-bdff-4775d1574bb8",
+        "position": "1675,842"
+      },
+      {
+        "id": "937f9a29-7679-4b79-9ebd-760cd27f5822",
+        "position": "1512.5,929.5"
+      },
+      {
+        "id": "89d11d40-c445-4cb5-b86b-4a2c7d0f0db8",
+        "position": "1675,929.5"
+      },
+      {
+        "id": "40050c0e-73fd-424e-809a-8f1dda428de2",
+        "position": "1862.5,592.000000000001"
+      },
+      {
+        "id": "d4ec862f-23bf-4e60-94af-c8f21b25d536",
+        "position": "1837.5,842"
+      },
+      {
+        "id": "8f874bd0-7211-40f8-9e95-d22c8ea8109f",
+        "position": "1600,1029.5"
+      },
+      {
+        "id": "ffc6e08d-43df-4648-ab5d-915b0a243aef",
+        "position": "1762.5,1029.5"
+      },
+      {
+        "id": "a01e7c6b-e21b-463b-9774-c7d461e86898",
+        "position": "1925,1029.5"
+      },
+      {
+        "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+        "position": "1837.5,1129.5"
+      },
+      {
+        "id": "436989d9-8c9a-4a13-be00-48f38f2d44e0",
+        "position": "2012.5,1129.5"
+      },
+      {
+        "id": "632d7ee4-fc23-40f9-ad27-c24fddc5e8bd",
+        "position": "2087.5,1029.5"
+      },
+      {
+        "id": "11bc650b-0ac7-4db4-9b11-95bd7c07bd91",
+        "position": "2050,842"
+      },
+      {
+        "id": "9368b5fe-be09-4091-bcee-8d9f235e15de",
+        "position": "2025,504.5"
+      },
+      {
+        "id": "33ff1e57-77b8-4399-9c63-afb06f0321f8",
+        "position": "2187.5,504.5",
+        "height": 54.0
+      },
+      {
+        "id": "86b16637-5b3e-47af-a9d2-ed9041c1da90",
+        "position": "2375,504.5",
+        "height": 54.0
+      },
+      {
+        "id": "04922f79-1929-4940-bae0-19b3cf97b99f",
+        "position": "2537.5,504.5"
+      },
+      {
+        "id": "119206d9-0ca7-4382-a4d2-0fec69974c93",
+        "position": "2700,504.5"
+      },
+      {
+        "id": "fbaeca63-e9d6-47fd-88cf-82b61c5c14f0",
+        "position": "2862.5,504.5"
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "a51608d7-c170-4f39-a396-db787b487762",
+        "type": "comment",
+        "header": "DriverMove",
+        "body": "Waits for messages, will go to new location position when recieved, or will stop when alive enemy detected from group",
+        "bodyAlignment": "Left",
+        "width": 238.0,
+        "height": 98.0,
+        "headerBackground": "#FF00FF00",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FF90EE90",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3840,2742",
+    "gridPadding": "0,4.50000000000004"
+  },
+  "parameters": [
+    {
+      "name": "actionData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "reset": "return false",
+    "position": "return arg.actionData.position",
+    "routeRestrictions": "return arg.actionData.routeRestrictions",
+    "halt": "return false",
+    "speed": "return arg.actionData.speed",
+    "avoidThreats": "return arg.actionData.avoidThreats",
+    "allThreats": "return {}",
+    "waypointDescription": "return \"\"",
+    "speedMonitor": "return 0",
+    "speedMonitorTimer": "return TimedCounter()",
+    "vehicleIsBlocked": "return false",
+    "isHaltedOnDetect": "return false",
+    "threatTickTime": "return TimedCounter()",
+    "isFollowing": "return false",
+    "followingTickTime": "return TimedCounter()",
+    "owner": "return nil",
+    "followMePos": "return self:GetPosition()",
+    "futurePath": "return future"
+  }
+}

@@ -10,7 +10,7 @@
       "script": [
         "local listOfChildElements = orbat.GetChildElements()",
         "local pointman = listOfChildElements[1]",
-        "",
+        "loc.point = pointman",
         "-- local newOrder = team.Reorder(listOfChildElements, pointman)",
         "",
         "message.SendOrder(",
@@ -33,7 +33,7 @@
         "    local soldier = listOfChildElements[i]",
         "    if soldier ~= pointman then",
         "        message.SendOrder(",
-        "            previousSoldier, -- receiver",
+        "            soldier, -- receiver",
         "            arg.orderData.childElementBtset, -- btset",
         "            \"follow\", -- behaviorName",
         "            { -- behaviorParameters",
@@ -138,7 +138,6 @@
     }
   ],
   "locals": {
-    "elementToFollow": "return nil",
-    "elementToFollowValid": "return nil"
+    "point": "return nil"
   }
 }

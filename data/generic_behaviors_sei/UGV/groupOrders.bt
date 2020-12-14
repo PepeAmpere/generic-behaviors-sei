@@ -1,0 +1,383 @@
+{
+  "name": "Process Group Orders",
+  "id": "ee127aaa-84e0-4b5a-8875-4dc751bbfd78",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Waypoint delay",
+      "id": "8016ba01-be66-4181-a516-1eb95638816c",
+      "type": "wait",
+      "time": [
+        "return arg.missionData.delay"
+      ]
+    },
+    {
+      "name": "Grab driver/spotter",
+      "id": "334d1772-44d0-4c36-918e-856798af0152",
+      "type": "scriptAction",
+      "script": [
+        "-- Make sure we have a valid group with at least one entity",
+        "local FirstGunnerFound = false",
+        "",
+        "if (self:GetEntityCount() > 0) then",
+        "",
+        "    -- Get the first group entities vehicle crew position",
+        "    local currPosition = self:GetEntity(0):GetOwnCrewPosition()",
+        "",
+        "    -- Make sure we are in a vehicle and the position is valid",
+        "    if currPosition:Valid() then",
+        "",
+        "        -- We are in a vehicle so get all the available positions",
+        "        local crewPositions = currPosition:GetVehicle():GetCrewPositions()",
+        "",
+        "        -- Loop through all the positions",
+        "        for i, crewPosition in ipairs(crewPositions) do",
+        "",
+        "            -- Find the entity responsible for driving",
+        "            if crewPosition:GetRole() == VehicleRole.Driver then",
+        "                -- Make sure the position has a valid entity",
+        "                if crewPosition:GetOccupant():Valid() then",
+        "                    -- It is so store it for reference",
+        "                    loc.driver = crewPosition:GetOccupant()",
+        "                end",
+        "            end",
+        "            if (crewPosition:GetRole() == VehicleRole.Gunner and not FirstGunnerFound) then",
+        "                -- Make sure the position has a valid entity",
+        "                if crewPosition:GetOccupant():Valid() then",
+        "                    -- It is so store it for reference",
+        "                    loc.spotter = crewPosition:GetOccupant()",
+        "                    loc.gunnerCrewPosition = crewPosition",
+        "                    FirstGunnerFound = true",
+        "                    -- Figure out if this vehicle has a cannon, machine gun etc",
+        "                    loc.allWeapons = crewPosition:GetWeapons();",
+        "                    if #loc.allWeapons > 1 then",
+        "                        loc.hasMultipleWeapons = true",
+        "                    end",
+        "                    for i,w in ipairs(loc.allWeapons) do",
+        "                       if (IsWeaponKindOf(w,\"vbs2_vehicleTankCannon\")) then",
+        "                          loc.hasMainCannon = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiVehicle = true",
+        "                       end",
+        "                       if (IsWeaponKindOf(w,\"vbs2_vehicleMG\")) then",
+        "                          loc.hasMachinegun = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiPersonnel = true",
+        "                       end",
+        "                       if (IsWeaponKindOf(w,\"vbs2_vehicleLauncherMissile\")) then",
+        "                          loc.hasMissiles = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiVehicle = true",
+        "                       end",
+        "                       if (IsWeaponKindOf(w,\"vbs_ffd_av_laser\")) then",
+        "                          loc.hasLaser = w",
+        "                          loc.hasWeapon = true",
+        "                          loc.isAntiVehicle = true",
+        "                       end",
+        "                    end",
+        "                end",
+        "            end",
+        "        end",
+        "    end",
+        "end",
+        "local thisROE = arg.missionData.engageEnemies",
+        "loc.defend = arg.missionData.defend",
+        "loc.engageEnemies = arg.missionData.engageEnemies",
+        "local thisWPMessage = \"Move to\"",
+        "local thisROEString = \": Hold fire\"",
+        "loc.reportWaypointComplete = arg.missionData.ugv_Wp_Report",
+        "loc.haltOnDetect = arg.missionData.haltOnDetect",
+        "self:SendMessage(loc.spotter, \"HaltOnDetectUpdate\", {",
+        "    treePath = {\"umvBTSet\", \"driverMove\"},",
+        "    haltOnDetect = loc.haltOnDetect})",
+        "",
+        "-- Generate Report Panel message detailing waypoint details",
+        "if (thisROE == \"returnFire\") then",
+        "    thisROEString = \": Return fire\"",
+        "end",
+        "if (thisROE == \"openFire\") then",
+        "    thisROEString = \": Fire at will\"",
+        "end",
+        "thisWPMessage = thisWPMessage..thisROEString",
+        "if (loc.haltOnDetect) then",
+        "    thisWPMessage = thisWPMessage..\" + halt on detect\"",
+        "end",
+        "if (loc.defend) then",
+        "    thisWPMessage = thisWPMessage..\" + defend\"",
+        "end",
+        "loc.waypointDescription = thisWPMessage"
+      ]
+    },
+    {
+      "name": "Send orders to driver/spotter",
+      "id": "c81eb9fc-aa3f-4dfe-8dcf-23ab29fec7ad",
+      "type": "scriptAction",
+      "script": [
+        "local thisRouteRestrictions = arg.missionData.routeRestrictions",
+        "local thisSpeed = arg.missionData.speed",
+        "local thisAvoidThreats = arg.missionData.avoidThreats",
+        "loc.defend = arg.missionData.defend",
+        "loc.engageEnemies = arg.missionData.engageEnemies",
+        "",
+        "self:SendMessage(loc.driver, \"NewActionRequest\", {",
+        "    treePath = {\"umvBTSet\", \"driverMove\"},",
+        "    parent = self,",
+        "    position = arg.missionData.position,",
+        "    driver = loc.driver,",
+        "    spotter = loc.spotter,",
+        "    routeRestrictions = thisRouteRestrictions,",
+        "    avoidThreats = thisAvoidThreats,",
+        "    speed = thisSpeed,",
+        "    defend = loc.defend,",
+        "    haltOnDetect = arg.missionData.haltOnDetect,",
+        "    forceReset = true",
+        "    })",
+        "",
+        "if (loc.spotter ~= nil) then",
+        "self:SendMessage(loc.spotter, \"NewActionRequest\", {",
+        "    treePath = {\"umvBTSet\", \"spotterActions\"},",
+        "    parent = self,",
+        "    engageEnemies = loc.engageEnemies,",
+        "    hasMainCannon = loc.hasMainCannon,",
+        "    hasMachinegun = loc.hasMachinegun,",
+        "    hasMissiles = loc.hasMissiles,",
+        "    hasLaser = loc.hasLaser,",
+        "    isAntiVehicle = loc.isAntiVehicle,",
+        "    isAntiPersonnel = loc.isAntiPersonnel,",
+        "    allWeapons = loc.allWeapons,",
+        "    gunnerCrewPosition = loc.gunnerCrewPosition,",
+        "    hasMultipleWeapons = loc.hasMultipleWeapons,",
+        "    waypointDescription = loc.waypointDescription,",
+        "    haltOnDetect = arg.missionData.haltOnDetect,",
+        "    hasWeapon = loc.hasWeapon})",
+        "end"
+      ]
+    },
+    {
+      "name": "Listen for stuff",
+      "id": "dca209e5-5d1b-4dc0-be18-27e245204220",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "Move complete",
+          "id": "e717a96d-cdce-46bb-94f6-8bff413675ce",
+          "type": "messageHandler",
+          "subject": "MoveCompleted",
+          "handler": [
+            "local thisROE = arg.missionData.engageEnemies",
+            "local thisEngageEnemies = loc.engageEnemies",
+            "local thisDefend = loc.defend",
+            "local thisWPMessage = \"Move to\"",
+            "local thisROEString = \": Hold fire\"",
+            "if (loc.reportWaypointComplete) then",
+            "    self:SendMessage(Message.External, \"WAYPOINT_COMPLETED\", {",
+            "    actionName = loc.waypointDescription})",
+            "end",
+            "",
+            "-- If the waypoint is a defend wp then tell the gunner",
+            "if (arg.missionData.defend) then",
+            "    self:SendMessage(loc.spotter, \"SetDefend\", {",
+            "    engageEnemies = \"openFire\"})",
+            "end"
+          ]
+        },
+        {
+          "name": "Toggle halt",
+          "id": "6a3b73ea-4448-447d-8d66-8a1e54541bd9",
+          "type": "messageHandler",
+          "subject": "TargetSpotted",
+          "handler": [
+            "local targetSpotted = msg.value.targetSpotted",
+            "local thisIsHaltedOnDetect = msg.value.isHaltedOnDetect",
+            "",
+            "--Tell the driver to halt or go",
+            "self:SendMessage(loc.driver, \"Halt\", {",
+            "    treePath = {\"umvBTSet\", \"driverMove\"},",
+            "    isHaltedOnDetect = thisIsHaltedOnDetect,",
+            "    halt = targetSpotted})",
+            "",
+            "--Tell the spotter whether we're halted on detect",
+            "--[[self:SendMessage(loc.spotter, \"HaltedOnDetectStatus\", {",
+            "    treePath = {\"umvBTSet\", \"driverMove\"},",
+            "    isHaltedOnDetect = thisIsHaltedOnDetect,",
+            "    halt = targetSpotted})]]--",
+            "",
+            "--Tell VBS (report panel) that we've halted on detection of enemy",
+            "if (thisIsHaltedOnDetect) then",
+            "    self:SendMessage(Message.External, \"HALT_ON_DETECT\", {",
+            "        actionName = loc.waypointDescription})",
+            "end"
+          ]
+        },
+        {
+          "name": "progress blocked",
+          "id": "4a36e9a0-6aba-41ab-90e7-c93d3b68804c",
+          "type": "messageHandler",
+          "subject": "progressBlocked",
+          "handler": [
+            "self:SendMessage(Message.External, \"PROGRESS_BLOCKED\", {",
+            "actionName = loc.waypointDescription})"
+          ]
+        },
+        {
+          "name": "Following?",
+          "id": "107e93fc-e896-474b-ae73-9d50832ce020",
+          "type": "messageHandler",
+          "subject": "UGVFollowing",
+          "handler": [
+            "self:SendMessage(loc.driver, \"UGVFollowing\", {",
+            "    treePath = {\"umvBTSet\", \"driverMove\"},",
+            "    isFollowing = msg.value.isFollowing,",
+            "    owner = msg.value.owner})",
+            "DebugLog(\"isFollowing received by group\")"
+          ]
+        },
+        {
+          "name": "vbsCon_AbortAction",
+          "id": "f333b2d9-5198-41ef-ba1d-d1454bbc87c3",
+          "type": "messageHandler",
+          "subject": "vbsCon_AbortAction",
+          "handler": [
+            "self:SendMessage(loc.driver, \"AbortWaypoint\", {",
+            "    treePath = {\"umvBTSet\", \"driverMove\"},",
+            "    abortWaypoint = true})"
+          ]
+        }
+      ]
+    }
+  ],
+  "unlinked-trees": [
+    {
+      "name": "Request threats",
+      "id": "5417c068-567b-4473-9a20-3794f486cf3a",
+      "type": "messageHandler",
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "5417c068-567b-4473-9a20-3794f486cf3a",
+            "position": "1950,317.5"
+          }
+        ],
+        "editorObjects": []
+      },
+      "subject": "DriverInitialised",
+      "handler": [
+        "self:SendMessage(Message.External, \"ThreatRequest\", {})"
+      ]
+    },
+    {
+      "name": "Threat List",
+      "id": "bc4f0b8f-3a57-453b-bf4f-529b2403866c",
+      "type": "messageHandler",
+      "meta": {
+        "nodesInfo": [
+          {
+            "id": "bc4f0b8f-3a57-453b-bf4f-529b2403866c",
+            "position": "2212.5,442.5"
+          }
+        ],
+        "editorObjects": []
+      },
+      "subject": "ThreatList",
+      "handler": [
+        "self:SendMessage(loc.driver, \"UpdateThreats\", {allThreats = msg.value.allThreats})",
+        "DebugLog(\"Threats received\")"
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "ee127aaa-84e0-4b5a-8875-4dc751bbfd78",
+        "position": "1737.5,205"
+      },
+      {
+        "id": "c9d3081a-c655-4344-8c2a-3eb62d76db5d",
+        "position": "1475,180"
+      },
+      {
+        "id": "8016ba01-be66-4181-a516-1eb95638816c",
+        "position": "1387.5,317.5"
+      },
+      {
+        "id": "334d1772-44d0-4c36-918e-856798af0152",
+        "position": "1550,317.5"
+      },
+      {
+        "id": "c81eb9fc-aa3f-4dfe-8dcf-23ab29fec7ad",
+        "position": "1712.5,317.5"
+      },
+      {
+        "id": "dca209e5-5d1b-4dc0-be18-27e245204220",
+        "position": "2125,317.5"
+      },
+      {
+        "id": "e717a96d-cdce-46bb-94f6-8bff413675ce",
+        "position": "1887.5,442.5"
+      },
+      {
+        "id": "6a3b73ea-4448-447d-8d66-8a1e54541bd9",
+        "position": "2050,442.5",
+        "height": 54.0
+      },
+      {
+        "id": "4a36e9a0-6aba-41ab-90e7-c93d3b68804c",
+        "position": "2375,442.5"
+      },
+      {
+        "id": "107e93fc-e896-474b-ae73-9d50832ce020",
+        "position": "2537.5,442.5"
+      },
+      {
+        "id": "f333b2d9-5198-41ef-ba1d-d1454bbc87c3",
+        "position": "2700,442.5"
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "c9d3081a-c655-4344-8c2a-3eb62d76db5d",
+        "type": "comment",
+        "header": "GroupOrders",
+        "body": "Fires when new WP becomes active",
+        "bodyAlignment": "Left",
+        "width": 189.0,
+        "height": 86.0,
+        "headerBackground": "#FF00FF00",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FF90EE90",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3840,2605",
+    "gridPadding": "0,5"
+  },
+  "parameters": [
+    {
+      "name": "missionData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "position": "return nil",
+    "routeRestrictions": "return arg.missionData.routeRestrictions",
+    "avoidThreats": "return arg.missionData.avoidThreats",
+    "driver": "return nil",
+    "spotter": "return nil",
+    "defend": "return false",
+    "engageEnemies": "return false",
+    "hasMainCannon": "return nil",
+    "allWeapons": "return {}",
+    "gunnerCrewPosition": "return nil",
+    "hasMachinegun": "return nil",
+    "hasMultipleWeapons": "return false",
+    "waypointDescription": "return \"\"",
+    "hasWeapon": "return false",
+    "hasMissiles": "return nil",
+    "isAntiVehicle": "return false",
+    "isAntiPersonnel": "return false",
+    "hasLaser": "return nil",
+    "haltOnDetect": "return arg.missionData.haltOnDetect",
+    "reportWaypointComplete": "return true"
+  }
+}

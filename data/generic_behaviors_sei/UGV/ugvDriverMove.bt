@@ -1,0 +1,130 @@
+{
+  "name": "Driver behavior",
+  "id": "88690dd9-b6fb-4c95-996a-72ba09b88592",
+  "type": "supervisedParallel",
+  "subtrees": [
+    {
+      "name": "Wait Forever",
+      "id": "2e289c6b-03a4-4e43-9243-5ea6f32cc064",
+      "type": "waitForever"
+    },
+    {
+      "name": "driver stuff",
+      "id": "40050c0e-73fd-424e-809a-8f1dda428de2",
+      "type": "selector",
+      "subtrees": [
+        {
+          "name": "Move to WP",
+          "id": "d4ec862f-23bf-4e60-94af-c8f21b25d536",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "set speed",
+              "id": "8f874bd0-7211-40f8-9e95-d22c8ea8109f",
+              "type": "setEntitySpeedLimits",
+              "movementSpeed": [
+                "return loc.speed"
+              ]
+            },
+            {
+              "name": "Move To Goal",
+              "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+              "type": "move",
+              "position": [
+                "return arg.orderData.position"
+              ],
+              "restrictions": [
+                "return MovementRestrictions.Unrestricted"
+              ]
+            },
+            {
+              "name": "Wait Forever",
+              "id": "bcc7c11a-0426-4ff0-895f-eac0bc824579",
+              "type": "waitForever"
+            }
+          ],
+          "decorators": [
+            {
+              "id": "853541d1-e489-41db-bb1f-b96a8853d0fc",
+              "type": "scriptCondition",
+              "name": "halt ~= true",
+              "script": [
+                "return not loc.halt"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Wait Forever",
+          "id": "11bc650b-0ac7-4db4-9b11-95bd7c07bd91",
+          "type": "waitForever"
+        }
+      ],
+      "active": true
+    },
+    {
+      "name": "Halt",
+      "id": "86b16637-5b3e-47af-a9d2-ed9041c1da90",
+      "type": "messageHandler",
+      "subject": "Halt",
+      "handler": [
+        "loc.halt = msg.value.halt"
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "88690dd9-b6fb-4c95-996a-72ba09b88592",
+        "position": "1862.5,404.500000000001"
+      },
+      {
+        "id": "2e289c6b-03a4-4e43-9243-5ea6f32cc064",
+        "position": "1675,504.5"
+      },
+      {
+        "id": "40050c0e-73fd-424e-809a-8f1dda428de2",
+        "position": "1862.5,504.500000000001"
+      },
+      {
+        "id": "d4ec862f-23bf-4e60-94af-c8f21b25d536",
+        "position": "1862.5,604.5"
+      },
+      {
+        "id": "8f874bd0-7211-40f8-9e95-d22c8ea8109f",
+        "position": "1725,754.5"
+      },
+      {
+        "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+        "position": "1900,754.5"
+      },
+      {
+        "id": "bcc7c11a-0426-4ff0-895f-eac0bc824579",
+        "position": "2075,754.5"
+      },
+      {
+        "id": "11bc650b-0ac7-4db4-9b11-95bd7c07bd91",
+        "position": "2050,604.5"
+      },
+      {
+        "id": "86b16637-5b3e-47af-a9d2-ed9041c1da90",
+        "position": "2050,504.5",
+        "height": 54.0
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2742",
+    "gridPadding": "0,4.50000000000004"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "halt": "return false",
+    "speed": "20"
+  }
+}

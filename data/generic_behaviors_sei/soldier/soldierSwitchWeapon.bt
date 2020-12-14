@@ -1,0 +1,44 @@
+{
+  "name": "Switch weapon",
+  "id": "a9d6454e-7331-4cb0-b232-9e88e3f30ab3",
+  "type": "selectWeapon",
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "a9d6454e-7331-4cb0-b232-9e88e3f30ab3",
+        "position": "1870.9,161.2"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2400"
+  },
+  "weapon": [
+    "local allWeapons = self:GetWeapons()",
+    "local usedWeapon = bb.rules.usedWeapon",
+    "",
+    "for _, weapon in pairs(allWeapons) do",
+    "    if usedWeapon == 1 then",
+    "        -- User selected AT weapon to be equiped",
+    "        if IsWeaponKindOf(weapon, 'vbs2_launcherRocket') then",
+    "            return weapon",
+    "        end",
+    "    else",
+    "        -- If we want",
+    "        if IsWeaponKindOf(weapon, 'vbs_rifle_base') or IsWeaponKindOf(weapon, 'vbs_machinegun_base')then",
+    "            return weapon",
+    "        end",
+    "    end",
+    "end",
+    "",
+    "-- Required weapon was not found, keep actual weapon (switch usedWeapon value back)",
+    "if usedWeapon == 1 then",
+    "    bb.rules.usedWeapon = 0",
+    "else",
+    "    bb.rules.usedWeapon = 1",
+    "end",
+    "",
+    "return self:GetCurrentWeapon()"
+  ],
+  "parameters": [],
+  "locals": {}
+}

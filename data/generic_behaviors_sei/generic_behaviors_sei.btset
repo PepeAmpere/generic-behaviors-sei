@@ -14,6 +14,7 @@
     "soldier\\soldierObserve.bt",
     "soldier\\soldierOccupy.bt",
     "soldier\\soldierReaction.bt",
+    "soldier\\soldierSwitchWeapon.bt",
     "team\\teamDefaultOccupy.bt",
     "team\\teamDismount.bt",
     "team\\teamFollowEntityInColumn.bt",
@@ -24,6 +25,9 @@
     "team\\teamMoveInColumn.bt",
     "team\\teamMoveInFormation.bt",
     "team\\teamUrbanOccupyFloor.bt",
+    "UGV\\ugvDriverMove.bt",
+    "UGV\\ugvGroupOccupy.bt",
+    "UGV\\ugvSpotterAction.bt",
     "genericRoot.bt"
   ],
   "initScripts": [

@@ -1,0 +1,523 @@
+{
+  "name": "Initialise & behavior",
+  "id": "f7eabe9e-d2e4-4c7d-9d34-4651eb5704ce",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Initialise RoE",
+      "id": "3bbcb91b-5d04-4135-9450-b2feff430ac7",
+      "type": "scriptAction",
+      "script": [
+        "loc.engageEnemies = arg.actionData.engageEnemies",
+        "loc.monitorIncomingFire = (loc.engageEnemies == \"returnFire\")",
+        "loc.fireAllowed = (loc.engageEnemies == \"openFire\")",
+        "loc.waypointDescription = arg.actionData.waypointDescription",
+        "loc.hasWeapon = arg.actionData.hasWeapon",
+        "if (bb.targetsSpotted ~= nil) then",
+        "    loc.targetsSpotted = bb.targetsSpotted",
+        "end"
+      ]
+    },
+    {
+      "name": "Gunner behavior",
+      "id": "1aa472a4-f64c-40db-8a32-d99809596fd1",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "Wait Forever",
+          "id": "0f5d0405-e9bb-4fa9-b2a3-d1225d8e72e7",
+          "type": "waitForever"
+        },
+        {
+          "name": "Look for enemy",
+          "id": "11165411-1072-4043-9123-12aa8dc1e735",
+          "type": "scriptAction",
+          "script": [
+            "if (loc.spotterTickTime:CurrentValue() < 1) then",
+            "    self:SetVisibilityRange(3000)",
+            "    local enemies = self:GetVisibleEnemies(3000)",
+            "",
+            "    self:SendMessage(Message.External, \"FOW_ENEMIES_SEEN\", {",
+            "    allEnemies = enemies",
+            "    })",
+            "",
+            "    loc.currentTargetIsVehicle = false",
+            "",
+            "    if (#enemies > 0) then",
+            "        -- If the vehicle has anti-vehicle ability, filter the enemies for vehicles before shooting at units",
+            "        if (arg.actionData.isAntiVehicle) then",
+            "            for i = 1, #enemies do",
+            "                if (enemies[i]:GetType() == EntityType.Vehicle) then",
+            "                    if ((arg.actionData.hasMainCannon ~= nil) or (arg.actionData.hasLaser ~= nil) or (arg.actionData.hasMissiles ~= nil and (self:GetPosition():Distance(enemies[i]:GetPosition()) > 50))) then",
+            "                        if (arg.actionData.hasLaser ~= nil) then",
+            "                            if (enemies[i]:IsKindOf(\"vbs2_uav_x\") or enemies[i]:IsKindOf(\"vbs2_helicopter_uav_x\") or enemies[i]:IsKindOf(\"vbs2_uav\")) then",
+            "                                if (self:IsClearSightTo(enemies[i]:GetAimPoint())) then",
+            "                                    loc.currentTarget = enemies[i]",
+            "                                    loc.currentTargetIsVehicle = true",
+            "                                    break",
+            "                                end",
+            "                            end",
+            "                        else",
+            "                            if (self:IsClearSightTo(enemies[i]:GetAimPoint())) then",
+            "                                loc.currentTarget = enemies[i]",
+            "                                loc.currentTargetIsVehicle = true",
+            "                                break",
+            "                            end",
+            "                        end",
+            "                    end",
+            "                else",
+            "                    --See if there's a non-engageable target for halt on detect logic",
+            "                    if (not arg.actionData.isAntiPersonnel) then",
+            "                        loc.canSeeNonengageableTarget = true",
+            "                    end",
+            "                end",
+            "            end",
+            "        end",
+            "",
+            "        if (not loc.currentTargetIsVehicle) then",
+            "            for i = 1, #enemies do",
+            "                --See if there's a non-engageable target for halt on detect logic",
+            "                if (enemies[i]:GetType() == EntityType.Vehicle and not arg.actionData.isAntiVehicle) then",
+            "                    loc.canSeeNonengageableTarget = true",
+            "                end",
+            "                if (self:IsClearSightTo(enemies[i]:GetAimPoint())) then",
+            "                    if  (enemies[i]:GetType() == EntityType.Person and (self:GetPosition():Distance(enemies[i]:GetPosition()) < 600)) then",
+            "                        loc.currentTarget = enemies[i]",
+            "                        break",
+            "                    end",
+            "                end",
+            "            end",
+            "        end",
+            "    --DebugLog(\"is halted on detect = \"..tostring(loc.isHaltedOnDetect))",
+            "        if ((loc.haltOnDetect and not loc.isHaltedOnDetect and not loc.fireAllowed) or (loc.haltOnDetect and not loc.isHaltedOnDetect and loc.canSeeNonengageableTarget)) then",
+            "           loc.isHaltedOnDetect = true",
+            "           self:SendMessage(",
+            "                arg.actionData.parent,",
+            "                'TargetSpotted',",
+            "                {",
+            "                    targetSpotted = true,",
+            "                    isHaltedOnDetect = loc.isHaltedOnDetect,",
+            "                    isNonengageableTarget = loc.canSeeNonengageableTarget",
+            "                }",
+            "            )",
+            "        end",
+            "    else",
+            "        loc.currentTarget = nil",
+            "        self:ReqHeadingFormationIfStationary()",
+            "        --if (loc.haltOnDetect and loc.isHaltedOnDetect and not loc.fireAllowed) then",
+            "        if (loc.isHaltedOnDetect) then",
+            "           loc.isHaltedOnDetect = false",
+            "           self:SendMessage(",
+            "                arg.actionData.parent,",
+            "                'TargetSpotted',",
+            "                {",
+            "                    targetSpotted = false,",
+            "                    isHaltedOnDetect = loc.isHaltedOnDetect",
+            "                }",
+            "            )",
+            "        end",
+            "        loc.canSeeNonengageableTarget = false",
+            "    end",
+            "",
+            "    -- Make a record of previously spotted targets",
+            "    for i = 1, #enemies do",
+            "        local tempName = tostring(enemies[i])",
+            "        if (loc.targetsSpotted[tempName] == nil) then",
+            "            local targetPos = enemies[i]:GetPosition()",
+            "            local targetType = enemies[i]:GetType()",
+            "            local thisTargetIs = \"Soldier\"",
+            "            if targetType == EntityType.Vehicle then",
+            "                thisTargetIs = \"Vehicle\"",
+            "            end",
+            "            if not(enemies[i]:IsEnemy(self)) then",
+            "            DebugLog(\"Non-combatant spotted\")",
+            "            end",
+            "            self:SendMessage(Message.External, \"TARGET_SPOTTED\", {",
+            "            actionName = loc.waypointDescription,",
+            "            items =",
+            "            {",
+            "                target = thisTargetIs,",
+            "                position = targetPos}",
+            "            })",
+            "            loc.targetsSpotted[tempName] = true",
+            "            bb.targetsSpotted = thisTargetsSpotted",
+            "        end",
+            "    end",
+            "",
+            "    loc.spotterTickTime = loc.spotterTickTime:Incremented(1, 0.5)",
+            "end"
+          ]
+        },
+        {
+          "name": "engage target",
+          "id": "a689e868-ebf7-4ae1-b71b-a0357758a8e5",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "send halt msg",
+              "id": "5cc95d57-f169-4394-96bd-ffdbf303672b",
+              "type": "scriptAction",
+              "script": [
+                "self:SendMessage(",
+                "    arg.actionData.parent,",
+                "    'TargetSpotted',",
+                "    {",
+                "        targetSpotted = true,",
+                "        isHaltedOnDetect = nil",
+                "    }",
+                ")",
+                "",
+                "local ammoMonitor = self:GetOwnCrewPosition():GetCurrentMagazine().rounds",
+                "local magazineMonitor = self:GetWeaponMagazines(self:GetOwnCrewPosition():GetCurrentWeapon())",
+                "if (ammoMonitor < 10 and not loc.lowOnAmmo and #magazineMonitor > 1) then",
+                "    self:SendMessage(Message.External, \"LOW_ON_AMMO\", {",
+                "    actionName = loc.waypointDescription})",
+                "    loc.lowOnAmmo = true",
+                "end",
+                "",
+                "if (ammoMonitor < 1 and not loc.outOfAmmo and #magazineMonitor == 0) then",
+                "    self:SendMessage(Message.External, \"OUT_OF_AMMO\", {",
+                "    actionName = loc.waypointDescription})",
+                "    loc.outOfAmmo = true",
+                "end"
+              ]
+            },
+            {
+              "name": "select weapon",
+              "id": "7b65e834-c559-48c1-beb9-042bb120bd60",
+              "type": "selectWeapon",
+              "weapon": [
+                "--if (loc.currentTargetIsVehicle and arg.actionData.hasMultipleWeapons) then",
+                "if (arg.actionData.hasLaser ~= nil) then",
+                "    return arg.actionData.hasLaser",
+                "else",
+                "    if (loc.currentTargetIsVehicle and (arg.actionData.hasMissiles ~= nil or arg.actionData.hasMainCannon ~= nil)) then",
+                "        if (arg.actionData.hasMissiles ~= nil) then",
+                "            return arg.actionData.hasMissiles",
+                "        else",
+                "            return arg.actionData.hasMainCannon",
+                "        end",
+                "    else",
+                "        if (loc.currentTargetIsVehicle and arg.actionData.hasMissiles ~= nil) then",
+                "            return arg.actionData.hasMissiles",
+                "        else",
+                "            return arg.actionData.hasMachinegun",
+                "        end",
+                "    end",
+                "end"
+              ]
+            },
+            {
+              "name": "Aim at tgt",
+              "id": "825a3487-644d-446d-9cdf-0339938a9e94",
+              "type": "scriptAction",
+              "script": [
+                "bb[\"currentTarget\"] = loc.currentTarget",
+                "",
+                "self:ReqHeadingAimAtEntity(loc.currentTarget, 1)"
+              ]
+            },
+            {
+              "name": "Shoot at tgt",
+              "id": "cee1c4e0-9505-48d2-8ceb-d08d34d34348",
+              "type": "fire",
+              "decorators": [
+                {
+                  "id": "fc3f220f-30b9-4962-82ab-e30195f1276a",
+                  "type": "scriptCondition",
+                  "name": "Line of sight?",
+                  "script": [
+                    "if (self:IsClearSightTo(loc.currentTarget:GetAimPoint()) and loc.currentTarget:IsAlive()) then",
+                    "--[[local _distance = self:GetMuzzlePoint():Distance(loc.currentTarget:GetAimPoint())",
+                    "self:HasClearShot(_distance -1)",
+                    "if (self:HasClearShot(_distance)) then]]--  ",
+                    "    return true",
+                    "else",
+                    "    loc.currentTarget = nil",
+                    "    return false",
+                    "end"
+                  ]
+                }
+              ],
+              "rounds": [
+                "if (loc.timeLastFired:CurrentValue() < 1) then",
+                "    local thisTargetType = loc.currentTarget:GetType()",
+                "    local thisTargetIs = \"Soldier\"",
+                "    if thisTargetType == EntityType.Vehicle then",
+                "        thisTargetIs = \"Vehicle\"",
+                "    end",
+                "    local tgtPos = loc.currentTarget:GetPosition()",
+                "    self:SendMessage(Message.External, \"ENGAGING_TARGET\", {",
+                "    actionName = loc.waypointDescription,",
+                "    items =",
+                "    {",
+                "        target = thisTargetIs,",
+                "        position = tgtPos}",
+                "    })",
+                "end",
+                "",
+                "loc.timeLastFired = loc.timeLastFired:Incremented(1, 5)",
+                "",
+                "return 1"
+              ]
+            }
+          ],
+          "decorators": [
+            {
+              "id": "a81b6fb7-86b1-421c-af78-47dbccca95f6",
+              "type": "succeeder",
+              "name": "Always Succeed"
+            },
+            {
+              "id": "f2e8cd39-e02d-48d9-831b-1728cad69969",
+              "type": "scriptCondition",
+              "name": "currentTarget ~= nil",
+              "script": [
+                "return (loc.currentTarget ~= nil and (loc.fireAllowed) and (not loc.outOfAmmo) and (loc.hasWeapon))"
+              ]
+            },
+            {
+              "id": "dcd1b6dc-8488-4558-8a57-2bb7353fd3b1",
+              "type": "scriptCondition",
+              "name": "wpn/tgt match?",
+              "script": [
+                "--[[DebugLog(\"tgtIsVehicle = \"..tostring(loc.currentTargetIsVehicle))",
+                "DebugLog(\"wpnIsVehicle = \"..tostring(arg.actionData.isAntiVehicle))",
+                "DebugLog(\"wpnIspersonnel = \"..tostring(arg.actionData.isAntiPersonnel))",
+                "]]--",
+                "return (loc.currentTargetIsVehicle and arg.actionData.isAntiVehicle) or ((not loc.currentTargetIsVehicle) and arg.actionData.isAntiPersonnel)"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Yes, monitor projectiles",
+          "id": "18f73d17-47ce-4404-89d3-c44bbdea0549",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "Monitor projectiles",
+              "id": "052be178-fb70-481d-b8ec-43d68184e0da",
+              "type": "scriptAction",
+              "script": [
+                "local nearProjectiles = self:GetNearEnemyProjectiles()",
+                "if (#nearProjectiles > 0) then",
+                "    loc.fireAllowed = true",
+                "    -- Once return fire has been triggered for this RoE then stop monitoring",
+                "    loc.monitorIncomingFire = false",
+                "end"
+              ]
+            }
+          ],
+          "decorators": [
+            {
+              "id": "dcd374d8-b13e-4c83-90be-d188aa160732",
+              "type": "succeeder",
+              "name": "Always Succeed"
+            },
+            {
+              "id": "c9561aaf-f3bb-4c39-a964-9240f46e8e9c",
+              "type": "scriptCondition",
+              "name": "Monitor projectiles?",
+              "script": [
+                "return loc.monitorIncomingFire"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "send no tgts message",
+          "id": "84da66f2-3555-49fb-958b-1bbb98a3b1d1",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "remove halt",
+              "id": "3d3bc48c-38fe-4b9a-ab8d-818127db90e9",
+              "type": "scriptAction",
+              "script": [
+                "-- Send message to group so that driver can continue",
+                "self:SendMessage(",
+                "    arg.actionData.parent,",
+                "    'TargetSpotted',",
+                "    {",
+                "        targetSpotted = false",
+                "    }",
+                ")"
+              ]
+            },
+            {
+              "name": "Wait Forever",
+              "id": "b35011de-aee7-4516-848d-7b210c2786e5",
+              "type": "waitForever"
+            }
+          ],
+          "decorators": [
+            {
+              "id": "9d2ff8fc-13cf-4ae0-b936-c9cea873f15e",
+              "type": "succeeder",
+              "name": "Always Succeed"
+            },
+            {
+              "id": "bb721fe3-11ee-4c37-8391-67198ed49d7d",
+              "type": "scriptCondition",
+              "name": "currentTarget == nil",
+              "script": [
+                "return (loc.currentTarget == nil or loc.outOfAmmo)"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "New RoE Recieved",
+          "id": "fd48e703-5a70-4835-a681-96e0170fb447",
+          "type": "messageHandler",
+          "subject": "NewActionRequest",
+          "handler": [
+            "loc.engageEnemies = msg.value.engageEnemies",
+            "loc.monitorIncomingFire = (loc.engageEnemies == \"returnFire\")",
+            "loc.fireAllowed = (loc.engageEnemies == \"openFire\")"
+          ]
+        },
+        {
+          "name": "Set to defend",
+          "id": "2232bd6a-a050-4b53-af8d-eea4d2057dc1",
+          "type": "messageHandler",
+          "subject": "SetDefend",
+          "handler": [
+            "loc.engageEnemies = msg.value.engageEnemies",
+            "loc.fireAllowed = (loc.engageEnemies == \"openFire\")"
+          ]
+        },
+        {
+          "name": "halted on detect",
+          "id": "817a2a79-8eea-4843-a26c-39983d1fd5dd",
+          "type": "messageHandler",
+          "subject": "HaltedOnDetectStatus",
+          "handler": [
+            "loc.isHaltedOnDetect = msg.value.isHaltedOnDetect"
+          ]
+        },
+        {
+          "name": "halt on detect update",
+          "id": "5d1c13aa-bd9b-49df-a51f-6cb31b6e1279",
+          "type": "messageHandler",
+          "subject": "HaltOnDetectUpdate",
+          "handler": [
+            "loc.haltOnDetect = msg.value.haltOnDetect"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "f7eabe9e-d2e4-4c7d-9d34-4651eb5704ce",
+        "position": "1800,1108.5"
+      },
+      {
+        "id": "3bbcb91b-5d04-4135-9450-b2feff430ac7",
+        "position": "1637.5,1208.5"
+      },
+      {
+        "id": "1aa472a4-f64c-40db-8a32-d99809596fd1",
+        "position": "1800,1208.5"
+      },
+      {
+        "id": "0f5d0405-e9bb-4fa9-b2a3-d1225d8e72e7",
+        "position": "1475,1358.5"
+      },
+      {
+        "id": "11165411-1072-4043-9123-12aa8dc1e735",
+        "position": "1637.5,1358.5"
+      },
+      {
+        "id": "a689e868-ebf7-4ae1-b71b-a0357758a8e5",
+        "position": "1800,1358.5"
+      },
+      {
+        "id": "5cc95d57-f169-4394-96bd-ffdbf303672b",
+        "position": "1312.5,1596"
+      },
+      {
+        "id": "7b65e834-c559-48c1-beb9-042bb120bd60",
+        "position": "1475,1596",
+        "width": 145.0
+      },
+      {
+        "id": "825a3487-644d-446d-9cdf-0339938a9e94",
+        "position": "1637.5,1596",
+        "width": 145.0
+      },
+      {
+        "id": "cee1c4e0-9505-48d2-8ceb-d08d34d34348",
+        "position": "1800,1596"
+      },
+      {
+        "id": "18f73d17-47ce-4404-89d3-c44bbdea0549",
+        "position": "1962.5,1358.5"
+      },
+      {
+        "id": "052be178-fb70-481d-b8ec-43d68184e0da",
+        "position": "1975,1596"
+      },
+      {
+        "id": "84da66f2-3555-49fb-958b-1bbb98a3b1d1",
+        "position": "2150,1358.5"
+      },
+      {
+        "id": "3d3bc48c-38fe-4b9a-ab8d-818127db90e9",
+        "position": "2162.5,1596"
+      },
+      {
+        "id": "b35011de-aee7-4516-848d-7b210c2786e5",
+        "position": "2337.5,1596"
+      },
+      {
+        "id": "fd48e703-5a70-4835-a681-96e0170fb447",
+        "position": "2325,1358.5",
+        "height": 54.0
+      },
+      {
+        "id": "2232bd6a-a050-4b53-af8d-eea4d2057dc1",
+        "position": "2487.5,1358.5"
+      },
+      {
+        "id": "817a2a79-8eea-4843-a26c-39983d1fd5dd",
+        "position": "2650,1358.5"
+      },
+      {
+        "id": "5d1c13aa-bd9b-49df-a51f-6cb31b6e1279",
+        "position": "2812.5,1358.5"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,3546",
+    "gridPadding": "0,8.5"
+  },
+  "parameters": [
+    {
+      "name": "actionData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "currentTarget": "return nil",
+    "engageEnemies": "return arg.actionData.engageEnemies",
+    "monitorIncomingFire": "return false",
+    "fireAllowed": "return false",
+    "weapon": "return nil",
+    "timeLastFired": "return TimedCounter()",
+    "lowOnAmmo": "return false",
+    "outOfAmmo": "return false",
+    "currentTargetIsVehicle": "return false",
+    "waypointDescription": "return \"\"",
+    "spotterTickTime": "return TimedCounter()",
+    "targetsSpotted": "return {}",
+    "hasWeapon": "return false",
+    "haltOnDetect": "return arg.actionData.haltOnDetect",
+    "isHaltedOnDetect": "return false",
+    "canSeeNonengageableTarget": "return false"
+  }
+}

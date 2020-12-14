@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Default</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>59B20EC6-A96B-407D-83AE-55A6E8D2C851</ProjectGuid>
+    <ProjectGuid>{7c759b57-d6cd-4a3e-9eba-144cd3a2000a}</ProjectGuid>
     <Name>generic_behaviors_sei</Name>
     <RootNamespace>generic_behaviors_sei</RootNamespace>
   </PropertyGroup>
@@ -65,6 +65,9 @@
     <Content Include="soldier\soldierReaction.bt">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="soldier\soldierSwitchWeapon.bt">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="tableExt.lua">
       <SubType>Content</SubType>
     </Content>
@@ -98,8 +101,18 @@
     <Content Include="team\teamUrbanOccupyFloor.bt">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="UGV\ugvDriverMove.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="UGV\ugvGroupOccupy.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="UGV\ugvSpotterAction.bt">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="UGV" />
     <Folder Include="team" />
     <Folder Include="soldier" />
   </ItemGroup>
