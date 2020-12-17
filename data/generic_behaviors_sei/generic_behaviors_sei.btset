@@ -25,7 +25,11 @@
     "team\\teamMoveInColumn.bt",
     "team\\teamMoveInFormation.bt",
     "team\\teamUrbanOccupyFloor.bt",
+    "turret\\turretGroup.bt",
+    "turret\\turretGroupListeners.bt",
+    "turret\\turretSpotterAction.bt",
     "UGV\\ugvDriverMove.bt",
+    "UGV\\ugvGroupListeners.bt",
     "UGV\\ugvGroupOccupy.bt",
     "UGV\\ugvSpotterAction.bt",
     "genericRoot.bt"

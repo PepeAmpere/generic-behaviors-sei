@@ -1,0 +1,57 @@
+{
+  "name": "Group behavior",
+  "id": "accf06c4-a621-45c8-8f20-4fd9105ea49d",
+  "type": "sequence",
+  "subtrees": [
+    {
+      "name": "Init gunner behavior",
+      "id": "8b0ad400-d515-4bd9-8b52-6d7d22b46b22",
+      "type": "scriptAction",
+      "script": [
+        "-- Turret group is supposed to have only 1 entity",
+        "loc.spotter = self:GetEntity(0)",
+        "",
+        "self:SendMessage(loc.spotter, \"NewOrder\", {",
+        "    behaviorName = \"turretSpotter\",",
+        "    turnAngle = arg.orderData.turnAngle",
+        "    }",
+        ")"
+      ]
+    },
+    {
+      "name": "Listeners",
+      "id": "3a996fd5-36bf-433b-950b-0dc6ee43ecee",
+      "type": "reference",
+      "target": [
+        "generic_behaviors_sei",
+        "turretGroupListeners"
+      ],
+      "arguments": {
+        "spotter": "loc.spotter"
+      }
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "accf06c4-a621-45c8-8f20-4fd9105ea49d",
+        "position": "1840.4,141.6"
+      },
+      {
+        "id": "8b0ad400-d515-4bd9-8b52-6d7d22b46b22",
+        "position": "1737.5,237.5"
+      },
+      {
+        "id": "3a996fd5-36bf-433b-950b-0dc6ee43ecee",
+        "position": "1937.5,237.5"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2402.4",
+    "gridPadding": "0,2.8421709430404E-14"
+  },
+  "parameters": [],
+  "locals": {
+    "spotter": "return nil"
+  }
+}

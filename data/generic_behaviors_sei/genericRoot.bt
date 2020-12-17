@@ -31,7 +31,9 @@
         "        [\"occupy\"] = {\"generic_behaviors_sei\", \"soldierOccupy\"}, --INPUTS: position",
         "",
         "        [\"ugvMove\"] = {\"generic_behaviors_sei\", \"ugvDriverMove\"},",
-        "        [\"ugvSpot\"] = {\"generic_behaviors_sei\", \"ugvSpotterAction\"},",
+        "        [\"ugvSpotter\"] = {\"generic_behaviors_sei\", \"ugvSpotterAction\"},",
+        "        ",
+        "        [\"turretSpotter\"] = {\"generic_behaviors_sei\", \"turretSpotterAction\"},",
         "                ",
         "        -- LOW LEVEL (without reaction)",
         "        [\"fight\"] = {\"generic_behaviors_sei\", \"soldierFight\"},",
@@ -47,6 +49,8 @@
         "        -- HIGH LEVEL AUTONOMOUS",
         "        [\"occupy\"] = {\"generic_behaviors_sei\", \"teamDefaultOccupy\"}, --INPUTS: position",
         "        [\"ugvMove\"] = {\"generic_behaviors_sei\", \"ugvGroupOccupy\"}, --INPUTS: position",
+        "        ",
+        "        [\"turretGroup\"] = {\"generic_behaviors_sei\", \"turretGroup\"},",
         "        ",
         "        -- LOW LEVEL (without reaction)",
         "        [\"follow\"] = {\"generic_behaviors_sei\", \"teamFollowEntityInColumn\"}, --INPUTS: entity",
@@ -109,20 +113,32 @@
           "subject": "NewOrder"
         },
         {
-          "name": "UAVTargets",
-          "id": "35ec641a-e74e-4143-a529-6b75780ad1d4",
-          "type": "messageHandler",
-          "subject": "RegisterTargets",
-          "handler": [
-            "local msgValue = msg.value",
-            "",
-            "local targets = msg.value.targets",
-            "",
-            "if",
-            "    targets ~= nil",
-            "then",
-            "    bb.targets = targets",
-            "end"
+          "name": "<unnamed>",
+          "id": "81efdd30-dba5-4742-8866-06faf3d4d2e8",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "UAVTargets",
+              "id": "35ec641a-e74e-4143-a529-6b75780ad1d4",
+              "type": "messageHandler",
+              "subject": "RegisterTargets",
+              "handler": [
+                "local msgValue = msg.value",
+                "",
+                "local targets = msg.value.targets",
+                "",
+                "if",
+                "    targets ~= nil",
+                "then",
+                "    bb.targets = targets",
+                "end"
+              ]
+            },
+            {
+              "name": "Succeed",
+              "id": "179c6ee2-cacc-4744-8316-971c11b44b56",
+              "type": "success"
+            }
           ]
         },
         {
@@ -225,6 +241,15 @@
             "        terrainType = terrainType,",
             "    }",
             ")"
+          ]
+        },
+        {
+          "name": "EngageTarget",
+          "id": "181aa043-8b8d-4597-8b20-e6a75a16a818",
+          "type": "messageHandler",
+          "subject": "EngageTarget",
+          "handler": [
+            "bb.engageTarget = msg.value.target"
           ]
         },
         {
@@ -346,8 +371,16 @@
         "position": "1675,542.5"
       },
       {
+        "id": "81efdd30-dba5-4742-8866-06faf3d4d2e8",
+        "position": "1918.24285714286,543.671428571428"
+      },
+      {
         "id": "35ec641a-e74e-4143-a529-6b75780ad1d4",
-        "position": "1887.5,542.5"
+        "position": "1787.5,605"
+      },
+      {
+        "id": "179c6ee2-cacc-4744-8316-971c11b44b56",
+        "position": "1973.1,611.1"
       },
       {
         "id": "486e08d2-8c27-4f05-95cd-77ad59cb1c41",
@@ -384,6 +417,10 @@
       {
         "id": "59ac6bf1-491d-4c11-9039-4414c2cd04b0",
         "position": "2287.5,542.5"
+      },
+      {
+        "id": "181aa043-8b8d-4597-8b20-e6a75a16a818",
+        "position": "2475,542.5"
       },
       {
         "id": "56efc338-605f-4867-8a00-b855354446f9",

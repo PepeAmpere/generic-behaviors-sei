@@ -1,0 +1,206 @@
+{
+  "name": "UGV group listeners",
+  "id": "f75b6aaa-4608-4e6e-a9bc-8e1d0df970c6",
+  "type": "supervisedParallel",
+  "subtrees": [
+    {
+      "name": "Wait Forever",
+      "id": "16da19ad-d15e-4086-b910-a8c762bef7de",
+      "type": "waitForever"
+    },
+    {
+      "name": "Toggle halt",
+      "id": "2155043d-3a07-4d66-a8e1-597e88355f35",
+      "type": "messageHandler",
+      "subject": "Halt",
+      "handler": [
+        "--Tell the driver to halt or go",
+        "self:SendMessage(",
+        "    arg.driver, ",
+        "    \"Halt\", ",
+        "    msg.value",
+        ")"
+      ]
+    },
+    {
+      "name": "update roe",
+      "id": "2f4857d6-8ea1-479e-8c1d-b13b4e2cbed4",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "roe updated?",
+          "id": "612acf82-6878-4f8e-9fa9-0fcd4ff982c3",
+          "type": "waitUntil",
+          "condition": [
+            "return bb.rules.roe ~= loc.previousRoe"
+          ]
+        },
+        {
+          "name": "Update gunner roe",
+          "id": "8ce449b2-611f-4200-832c-07d13fce72e1",
+          "type": "scriptAction",
+          "script": [
+            "loc.previousRoe = bb.rules.roe",
+            "",
+            "self:SendMessage(",
+            "    arg.spotter,",
+            "    \"NewRule\",",
+            "    {",
+            "        ruleName = \"roe\",",
+            "        ruleValue = bb.rules.roe",
+            "    }",
+            ")"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Visible enemies request",
+      "id": "a68f9705-b634-49ee-8cc0-e15d9fa17930",
+      "type": "messageHandler",
+      "subject": "VisibleEnemiesRequest",
+      "handler": [
+        "local receiver = msg.sender",
+        "",
+        "self:SendMessage(",
+        "    arg.spotter,",
+        "    \"VisibleEnemiesRequest\",",
+        "    {",
+        "        receiver = receiver",
+        "    }",
+        ")"
+      ]
+    },
+    {
+      "name": "Reload request",
+      "id": "94de8a20-2603-46a8-abb3-e2abc16a5b13",
+      "type": "messageHandler",
+      "subject": "ReloadRequest",
+      "handler": [
+        "self:SendMessage(",
+        "    arg.spotter,",
+        "    \"ReloadRequest\",",
+        "    {",
+        "    }",
+        ")"
+      ]
+    },
+    {
+      "name": "update engageTarget",
+      "id": "2e18f1e2-bd52-4e93-8c19-520696bda004",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "target updated?",
+          "id": "f23d735c-57d5-4742-b5b1-324dc2c120ca",
+          "type": "waitUntil",
+          "condition": [
+            "return bb.engageTarget ~= loc.previousEngageTarget"
+          ]
+        },
+        {
+          "name": "Update gunner target",
+          "id": "d440adc6-13e4-413d-9788-863ebf4c1564",
+          "type": "scriptAction",
+          "script": [
+            "loc.previousEngageTarget = bb.engageTarget",
+            "",
+            "self:SendMessage(",
+            "    arg.spotter,",
+            "    \"EngageTarget\",",
+            "    {",
+            "        target = bb.engageTarget",
+            "    }",
+            ")"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "f75b6aaa-4608-4e6e-a9bc-8e1d0df970c6",
+        "position": "1762.5,149.611111111111"
+      },
+      {
+        "id": "584afbf7-bfa1-4dbb-8469-ff62d2b5c4eb",
+        "position": "1937.5,74.6111111111112"
+      },
+      {
+        "id": "16da19ad-d15e-4086-b910-a8c762bef7de",
+        "position": "1625,299.611111111111"
+      },
+      {
+        "id": "2155043d-3a07-4d66-a8e1-597e88355f35",
+        "position": "1787.5,299.611111111112",
+        "height": 54.0
+      },
+      {
+        "id": "2f4857d6-8ea1-479e-8c1d-b13b4e2cbed4",
+        "position": "1950,299.611111111112"
+      },
+      {
+        "id": "612acf82-6878-4f8e-9fa9-0fcd4ff982c3",
+        "position": "1900,399.611111111112"
+      },
+      {
+        "id": "8ce449b2-611f-4200-832c-07d13fce72e1",
+        "position": "2062.5,399.611111111112"
+      },
+      {
+        "id": "a68f9705-b634-49ee-8cc0-e15d9fa17930",
+        "position": "2112.5,299.611111111111"
+      },
+      {
+        "id": "94de8a20-2603-46a8-abb3-e2abc16a5b13",
+        "position": "2312.5,299.611111111111"
+      },
+      {
+        "id": "2e18f1e2-bd52-4e93-8c19-520696bda004",
+        "position": "2487.5,299.611111111111"
+      },
+      {
+        "id": "f23d735c-57d5-4742-b5b1-324dc2c120ca",
+        "position": "2437.5,399.611111111111"
+      },
+      {
+        "id": "d440adc6-13e4-413d-9788-863ebf4c1564",
+        "position": "2600,399.611111111111"
+      }
+    ],
+    "editorObjects": [
+      {
+        "id": "584afbf7-bfa1-4dbb-8469-ff62d2b5c4eb",
+        "type": "comment",
+        "header": "Requests for gunner",
+        "body": "Because the gunner cannot be right now extracted by SDK (or we didn't find any way how to do this), these requests has to be caughed by group and resended to the gunner. Gunner will than reply to the component for the enemies request. It also checks if roe and engageTarget values changed",
+        "bodyAlignment": "Left",
+        "width": 546.7428571428577,
+        "height": 292.13333333333327,
+        "headerBackground": "#FF00FF00",
+        "headerForeground": "#FF000000",
+        "boxBackground": "#FF90EE90",
+        "boxForeground": "#FF000000"
+      }
+    ],
+    "canvasSize": "3840,2487.11111111111",
+    "gridPadding": "0,12.1111111111112"
+  },
+  "parameters": [
+    {
+      "name": "driver",
+      "isOptional": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "spotter",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "previousRoe": "return bb.rule.roe",
+    "previousEngageTarget": "return nil"
+  }
+}

@@ -27,15 +27,41 @@
               ]
             },
             {
-              "name": "Move To Goal",
-              "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
-              "type": "move",
-              "position": [
-                "return arg.orderData.position"
+              "name": "Go to location",
+              "id": "e9dc62fc-0764-49d9-abd1-a98d7a344d8b",
+              "type": "selector",
+              "subtrees": [
+                {
+                  "name": "Move",
+                  "id": "b128f802-b5b9-4795-8d7f-766448b27a5a",
+                  "type": "move",
+                  "decorators": [
+                    {
+                      "id": "bc835c37-b095-4cc7-8549-6feecd41226f",
+                      "type": "scriptCondition",
+                      "name": "Has target?",
+                      "script": [
+                        "return loc.target ~= nil"
+                      ]
+                    }
+                  ],
+                  "position": [
+                    "return loc.target:GetPosition()"
+                  ]
+                },
+                {
+                  "name": "Move To Goal",
+                  "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+                  "type": "move",
+                  "position": [
+                    "return arg.orderData.position"
+                  ],
+                  "restrictions": [
+                    "return MovementRestrictions.Unrestricted"
+                  ]
+                }
               ],
-              "restrictions": [
-                "return MovementRestrictions.Unrestricted"
-              ]
+              "active": true
             },
             {
               "name": "Wait Forever",
@@ -68,7 +94,8 @@
       "type": "messageHandler",
       "subject": "Halt",
       "handler": [
-        "loc.halt = msg.value.halt"
+        "loc.halt = msg.value.halt",
+        "loc.target = msg.value.target"
       ]
     }
   ],
@@ -95,8 +122,16 @@
         "position": "1725,754.5"
       },
       {
-        "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+        "id": "e9dc62fc-0764-49d9-abd1-a98d7a344d8b",
         "position": "1900,754.5"
+      },
+      {
+        "id": "b128f802-b5b9-4795-8d7f-766448b27a5a",
+        "position": "1825,854.5"
+      },
+      {
+        "id": "bbf618c0-99e6-403e-ba16-974f2baeb866",
+        "position": "2012.5,904.5"
       },
       {
         "id": "bcc7c11a-0426-4ff0-895f-eac0bc824579",
@@ -125,6 +160,7 @@
   ],
   "locals": {
     "halt": "return false",
-    "speed": "20"
+    "speed": "20",
+    "target": "return nil"
   }
 }

@@ -101,7 +101,19 @@
     <Content Include="team\teamUrbanOccupyFloor.bt">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="turret\turretGroup.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="turret\turretGroupListeners.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="turret\turretSpotterAction.bt">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="UGV\ugvDriverMove.bt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="UGV\ugvGroupListeners.bt">
       <SubType>Content</SubType>
     </Content>
     <Content Include="UGV\ugvGroupOccupy.bt">
@@ -112,6 +124,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="turret" />
     <Folder Include="UGV" />
     <Folder Include="team" />
     <Folder Include="soldier" />

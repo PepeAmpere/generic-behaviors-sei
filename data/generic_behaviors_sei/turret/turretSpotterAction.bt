@@ -1,0 +1,447 @@
+{
+  "name": "Gunner behavior",
+  "id": "135dff96-2b2c-4abc-800b-54a4feb49dfb",
+  "type": "supervisedParallel",
+  "subtrees": [
+    {
+      "name": "Wait Forever",
+      "id": "7c4237a6-e104-4fb1-83b3-c61c1c7265db",
+      "type": "waitForever"
+    },
+    {
+      "name": "Check target valid",
+      "id": "2c871406-dace-4d49-a847-5801501e0f37",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "Check target",
+          "id": "82689376-fce0-463c-abc7-557e26f13d9a",
+          "type": "scriptAction",
+          "script": [
+            "-- Handle user requested target first",
+            "if bb.engageTarget == nil or (not bb.engageTarget:IsAlive()) then",
+            "    bb.engageTarget = nil",
+            "    ",
+            "    -- Check if the target was not manually diengaged by the user",
+            "    if loc.userRequestedTarget ~= nil and loc.userRequestedTarget == loc.currentTarget then",
+            "        loc.userRequestedTarget = nil",
+            "        loc.currentTarget = nil",
+            "    end",
+            "elseif math.abs(loc.turret:GetVectorForward():AngleTo(bb.engageTarget:GetPosition() - self:GetPosition())) <= loc.maxAngle then",
+            "    -- If the engaged target is withing angle, engage it",
+            "    loc.currentTarget = bb.engageTarget",
+            "    loc.reactionStarted = true",
+            "    loc.userRequestedTarget = bb.engageTarget",
+            "end",
+            "",
+            "if loc.currentTarget ~= nil and loc.currentTarget:IsAlive() and bb.rules.roe == 0 then",
+            "    return",
+            "end",
+            "",
+            "-- if roe == 2 we want also to remove target to stop engage",
+            "loc.currentTarget = nil",
+            "loc.reactionStarted = false"
+          ]
+        },
+        {
+          "name": "1s",
+          "id": "1c98480d-f81b-4966-ba1a-e972e3572d31",
+          "type": "wait",
+          "time": [
+            "return 1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fight",
+      "id": "72b152c3-0af7-46ce-850c-160e1712a6c5",
+      "type": "supervisedParallel",
+      "subtrees": [
+        {
+          "name": "Firing and moving",
+          "id": "01da130f-fa8d-4c98-9a2e-039f0ee8f130",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "Aim at tgt",
+              "id": "3d1aa6d2-b876-422c-aa3a-e47ec48ade31",
+              "type": "scriptAction",
+              "script": [
+                "self:ReqHeadingAimAtEntity(loc.currentTarget)"
+              ]
+            },
+            {
+              "name": "<unnamed>",
+              "id": "d8262293-8d6d-41ae-a4bb-c7c7c68f2630",
+              "type": "parallel",
+              "subtrees": [
+                {
+                  "name": "<unnamed>",
+                  "id": "6be87111-c5f8-48c1-8d48-ed67561d33d3",
+                  "type": "selector",
+                  "subtrees": [
+                    {
+                      "name": "Shoot at tgt",
+                      "id": "39c65a3e-c384-4d75-a109-649593e4270e",
+                      "type": "fire",
+                      "decorators": [
+                        {
+                          "id": "894b9a75-f29c-47c5-bef6-dcd55c7e3bfa",
+                          "type": "waitUntil",
+                          "name": "No firendlies in fire",
+                          "condition": [
+                            "local coneAngle = 1",
+                            "local coneDistance = loc.currentTarget:GetPosition():Distance(self:GetPosition())",
+                            "",
+                            "return not self:AreFriendliesInCone(loc.currentTarget, coneAngle, coneDistance)"
+                          ]
+                        },
+                        {
+                          "id": "e4e179e2-845f-4675-8255-1367c62cc924",
+                          "type": "scriptCondition",
+                          "name": "Line of sight?",
+                          "script": [
+                            "if (self:IsClearSightTo(loc.currentTarget:GetAimPoint())) then",
+                            "--[[local _distance = self:GetMuzzlePoint():Distance(loc.currentTarget:GetAimPoint())",
+                            "self:HasClearShot(_distance -1)",
+                            "if (self:HasClearShot(_distance)) then]]--  ",
+                            "    return true",
+                            "else",
+                            "    return false",
+                            "end"
+                          ]
+                        }
+                      ],
+                      "rounds": [
+                        "local magazineAmmo = self:GetOwnCrewPosition():GetCurrentMagazine().rounds",
+                        "",
+                        "if magazineAmmo == loc.rounds then",
+                        "    return loc.rounds - 1",
+                        "end",
+                        "return loc.rounds"
+                      ]
+                    },
+                    {
+                      "name": "Forget target",
+                      "id": "69035b58-a17d-428c-86f6-d57044afff77",
+                      "type": "scriptAction",
+                      "script": [
+                        "loc.reactionStarted = false"
+                      ]
+                    }
+                  ],
+                  "active": true
+                },
+                {
+                  "name": "1.5s",
+                  "id": "c2dbdcb4-56fd-44b2-81b7-8836025e1bea",
+                  "type": "wait",
+                  "time": [
+                    "return 1.5"
+                  ]
+                }
+              ],
+              "waitForAll": false
+            },
+            {
+              "name": "Check ammo",
+              "id": "8ddc7b37-e15f-4eaf-aa8a-3059b4d69939",
+              "type": "scriptAction",
+              "script": [
+                "local ammoMonitor = self:GetOwnCrewPosition():GetCurrentMagazine().rounds",
+                "local magazineMonitor = self:GetWeaponMagazines(self:GetOwnCrewPosition():GetCurrentWeapon())",
+                "",
+                "if (ammoMonitor < 1 and not loc.outOfAmmo and #magazineMonitor == 0) then",
+                "    loc.outOfAmmo = true",
+                "else",
+                "    loc.outOfAmmo = false",
+                "end"
+              ]
+            },
+            {
+              "name": "Wait after rounds",
+              "id": "f8d96c1d-86e9-45f3-88c0-7042b0daa0eb",
+              "type": "wait",
+              "time": [
+                "return 4"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Check turret angle",
+          "id": "7ea9b805-23ab-4655-b4a3-cd892728720d",
+          "type": "sequence",
+          "subtrees": [
+            {
+              "name": "Forget target",
+              "id": "dace9764-f7ea-4e09-a9a3-ed80c26853e0",
+              "type": "scriptAction",
+              "decorators": [
+                {
+                  "id": "23dc6f0d-1cce-43e7-bb6a-1d5064b127b9",
+                  "type": "succeeder",
+                  "name": "Always Succeed"
+                },
+                {
+                  "id": "4ec6679d-0bdc-4476-aca0-d50f6692bb3a",
+                  "type": "scriptCondition",
+                  "name": "Out of turret angle?",
+                  "script": [
+                    "return math.abs(loc.turret:GetVectorForward():AngleTo(loc.currentTarget:GetPosition() - self:GetPosition())) > loc.maxAngle"
+                  ]
+                }
+              ],
+              "script": [
+                "loc.reactionStarted = false",
+                "--self:ReqHeadingAbs(loc.turret:GetHeading())",
+                " self:ReqHeadingAbs(self:GetHeading())"
+              ]
+            },
+            {
+              "name": "0.5s",
+              "id": "6a8fe55b-ad19-426f-a6fa-526140c44bf1",
+              "type": "wait",
+              "time": [
+                "return 0.5"
+              ]
+            }
+          ]
+        }
+      ],
+      "decorators": [
+        {
+          "id": "877c6fd0-cf56-4214-af17-68d53bdb1a40",
+          "type": "succeeder",
+          "name": "Always Succeed"
+        },
+        {
+          "id": "cc39953c-4deb-41bc-a7c4-248ab8dcd1c1",
+          "type": "scriptCondition",
+          "name": "currentTarget ~= nil",
+          "script": [
+            "return loc.currentTarget ~= nil and loc.reactionStarted == true"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get target",
+      "id": "70781a0f-4f0f-4bf4-aec6-f6f72318b589",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "check if reactionStarted",
+          "id": "789a9ff0-2e45-45f4-86b3-82209cdbf157",
+          "type": "scriptAction",
+          "script": [
+            "local targets = self:GetVisibleEnemies(400)",
+            "",
+            "loc.visibleEnemies = targets",
+            "",
+            "-- PLaceholder for targets obtained from UGV",
+            "local reportedTargets = bb.targets",
+            "",
+            "if ",
+            "    bb.rules.roe == 0 and",
+            "    loc.reactionStarted ~= true",
+            "then",
+            "    -- temporary distance check, later use path",
+            "    for i=1, #targets do",
+            "        local target = targets[i]",
+            "        if ",
+            "            self:GetPosition():Distance(target:GetPosition()) < bb.rules.reactionDistanceTrigger and",
+            "            math.abs(loc.turret:GetVectorForward():AngleTo(target:GetPosition() - self:GetPosition())) <= loc.maxAngle",
+            "        then",
+            "            loc.reactionStarted = true",
+            "            loc.currentTarget = target",
+            "            return",
+            "        end ",
+            "    end",
+            "    ",
+            "    loc.currentTarget = nil",
+            "    -- No target - reset heading",
+            "    self:ReqHeadingAbs(loc.turret:GetHeading())",
+            "end "
+          ]
+        },
+        {
+          "name": "0.5s",
+          "id": "0f6809d3-db2d-4994-b577-75e498d47091",
+          "type": "wait",
+          "time": [
+            "return 0.5"
+          ]
+        }
+      ],
+      "decorators": [
+        {
+          "id": "baa7cabd-21ab-4a9c-af4a-af19439b5bd7",
+          "type": "succeeder",
+          "name": "Always Succeed"
+        }
+      ]
+    },
+    {
+      "name": "Visible enemies request",
+      "id": "d8e2fd43-31ea-4b1a-9d77-678724ae59b0",
+      "type": "messageHandler",
+      "subject": "VisibleEnemiesRequest",
+      "handler": [
+        "local receiver = msg.value.receiver",
+        "",
+        "self:SendMessage(",
+        "    receiver,",
+        "    \"VisibleEnemiesRequest\",",
+        "    {",
+        "        enemies = loc.visibleEnemies",
+        "    }",
+        ")"
+      ]
+    },
+    {
+      "name": "Reload request",
+      "id": "bb2aa97f-f076-4a5d-aa73-392ac6e917a8",
+      "type": "sequence",
+      "subtrees": [
+        {
+          "name": "Reload request",
+          "id": "b12c68b8-f551-45d1-9139-a794b1374197",
+          "type": "messageHandler",
+          "subject": "ReloadRequest"
+        },
+        {
+          "name": "Reload",
+          "id": "334352f4-7409-4aa7-b382-3c0c7d979149",
+          "type": "reloadWeapon"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "nodesInfo": [
+      {
+        "id": "135dff96-2b2c-4abc-800b-54a4feb49dfb",
+        "position": "1760.88688633348,157.402597402597"
+      },
+      {
+        "id": "7c4237a6-e104-4fb1-83b3-c61c1c7265db",
+        "position": "1273.38688633348,357.402597402597"
+      },
+      {
+        "id": "2c871406-dace-4d49-a847-5801501e0f37",
+        "position": "1473.38688633348,357.402597402597"
+      },
+      {
+        "id": "82689376-fce0-463c-abc7-557e26f13d9a",
+        "position": "1335.88688633348,469.902597402597"
+      },
+      {
+        "id": "1c98480d-f81b-4966-ba1a-e972e3572d31",
+        "position": "1498.38688633348,469.902597402597"
+      },
+      {
+        "id": "72b152c3-0af7-46ce-850c-160e1712a6c5",
+        "position": "1737.5,371.402597402597"
+      },
+      {
+        "id": "01da130f-fa8d-4c98-9a2e-039f0ee8f130",
+        "position": "1575,596.402597402597"
+      },
+      {
+        "id": "3d1aa6d2-b876-422c-aa3a-e47ec48ade31",
+        "position": "1223.38688633348,694.902597402597",
+        "width": 145.0
+      },
+      {
+        "id": "d8262293-8d6d-41ae-a4bb-c7c7c68f2630",
+        "position": "1425,696.402597402597"
+      },
+      {
+        "id": "6be87111-c5f8-48c1-8d48-ed67561d33d3",
+        "position": "1377.44285714286,783.602597402597"
+      },
+      {
+        "id": "39c65a3e-c384-4d75-a109-649593e4270e",
+        "position": "1287.5,871.402597402597"
+      },
+      {
+        "id": "69035b58-a17d-428c-86f6-d57044afff77",
+        "position": "1462.5,871.402597402597"
+      },
+      {
+        "id": "c2dbdcb4-56fd-44b2-81b7-8836025e1bea",
+        "position": "1550,783.902597402597"
+      },
+      {
+        "id": "8ddc7b37-e15f-4eaf-aa8a-3059b4d69939",
+        "position": "1625,696.402597402597"
+      },
+      {
+        "id": "f8d96c1d-86e9-45f3-88c0-7042b0daa0eb",
+        "position": "1800,696.402597402597"
+      },
+      {
+        "id": "7ea9b805-23ab-4655-b4a3-cd892728720d",
+        "position": "2075,596.402597402597"
+      },
+      {
+        "id": "dace9764-f7ea-4e09-a9a3-ed80c26853e0",
+        "position": "1987.5,696.402597402597"
+      },
+      {
+        "id": "6a8fe55b-ad19-426f-a6fa-526140c44bf1",
+        "position": "2162.5,696.402597402597"
+      },
+      {
+        "id": "70781a0f-4f0f-4bf4-aec6-f6f72318b589",
+        "position": "2073.38688633348,344.902597402597"
+      },
+      {
+        "id": "789a9ff0-2e45-45f4-86b3-82209cdbf157",
+        "position": "1973.38688633348,469.902597402597"
+      },
+      {
+        "id": "0f6809d3-db2d-4994-b577-75e498d47091",
+        "position": "2160.88688633348,469.902597402597"
+      },
+      {
+        "id": "d8e2fd43-31ea-4b1a-9d77-678724ae59b0",
+        "position": "2285.88688633348,344.902597402597"
+      },
+      {
+        "id": "bb2aa97f-f076-4a5d-aa73-392ac6e917a8",
+        "position": "2510.88688633348,344.902597402597"
+      },
+      {
+        "id": "b12c68b8-f551-45d1-9139-a794b1374197",
+        "position": "2417.61311366652,444.397835497837"
+      },
+      {
+        "id": "334352f4-7409-4aa7-b382-3c0c7d979149",
+        "position": "2592.61311366652,444.397835497837"
+      }
+    ],
+    "editorObjects": [],
+    "canvasSize": "3840,2721.4025974026",
+    "gridPadding": "0,8.9025974025971"
+  },
+  "parameters": [
+    {
+      "name": "orderData",
+      "isOptional": false,
+      "defaultValue": ""
+    }
+  ],
+  "locals": {
+    "currentTarget": "return nil",
+    "outOfAmmo": "return false",
+    "reactionStarted": "return false",
+    "rounds": "return 5",
+    "visibleEnemies": "return nil",
+    "userRequestedTarget": "return nil",
+    "maxAngle": "return arg.orderData.turnAngle",
+    "turret": "return self:GetOwnCrewPosition():GetVehicle()"
+  }
+}
